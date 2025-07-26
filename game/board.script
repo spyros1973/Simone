@@ -1,0 +1,102 @@
+local pegs={"game-peg0","game-peg1","game-peg2","game-peg3"}
+local state="show" --show|play
+local round=1 --difficulty, determines chain length and (later) number of buttons
+local chain_to_show={}
+local chain_to_enter={}
+local chain_playback_counter=0
+
+function get_chain(self)
+	local ret={}
+	local pegs_count=#pegs	
+	for i = 1, 3+round, 1 do
+		table.insert(ret,math.random(pegs_count))
+	end
+	for i = 1, #ret do
+		print (ret[i])
+	end
+	return ret
+end
+
+function reset_game(self) 
+	self.round=1
+	local sprites={"Match3Clover","Match3Heart","Match3Moon","Match3Star"}
+	for i, v in ipairs(pegs) do		
+		print ("setting "..v.." to "..sprites[i])
+		msg.post(v, "config", {sprite = sprites[i], order = i})
+	end	
+	chain_to_show=get_chain(self)
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	reset_game(self)
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	if state=="show" then
+		chain_playback_counter = chain_playback_counter + 1/60
+		if chain_playback_counter>1 then
+			print("showing "..tostring(chain_to_show[1]))
+			msg.post(pegs[chain_to_show[1]], "play")
+			table.remove(chain_to_show,1)
+			chain_playback_counter=0
+		end
+	end
+		
+	if #chain_to_show==0 then
+		state="play"
+		for i, v in ipairs(pegs) do					
+			msg.post(v, "activate")
+		end	
+	end
+	
+	if state=="play" then
+		if #chain_to_enter==0 then
+			print ("round won - go to next")
+		end
+	end
+	-- Add update code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function fixed_update(self, dt)
+	-- This function is called if 'Fixed Update Frequency' is enabled in the Engine section of game.project
+	-- Can be coupled with fixed updates of the physics simulation if 'Use Fixed Timestep' is enabled in
+	-- Physics section of game.project
+	-- Add update code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function on_message(self, message_id, message, sender)
+	-- Add message-handling code here
+	-- Learn more: https://defold.com/manuals/message-passing/
+	-- Remove this function if not needed
+end
+
+function on_input(self, action_id, action)
+	local pos = vmath.vector3(action.x, action.y, 0)
+	go.set_position(pos, "cursor")
+	-- Add input-handling code here. The game object this script is attached to
+	-- must have acquired input focus:
+	--
+	--    msg.post(".", "acquire_input_focus")
+	--
+	-- All mapped input bindings will be received. Mouse and touch input will
+	-- be received regardless of where on the screen it happened.
+	-- Learn more: https://defold.com/manuals/input/
+	-- Remove this function if not needed
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end

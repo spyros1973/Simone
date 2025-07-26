@@ -1,0 +1,22 @@
+name: "startup"
+scale_along_z: 0
+embedded_instances {
+  id: "handler"
+  data: "components {\n"
+  "  id: \"startup\"\n"
+  "  component: \"/startup/startup.script\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"game\"\n"
+  "  type: \"collectionproxy\"\n"
+  "  data: \"collection: \\\"/game/game.collection\\\"\\n"
+  "\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"menu\"\n"
+  "  type: \"collectionproxy\"\n"
+  "  data: \"collection: \\\"/menu/menu.collection\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+}

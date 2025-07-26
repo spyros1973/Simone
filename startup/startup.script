@@ -1,0 +1,51 @@
+function init(self)
+	self.controller_states={menu=false,game=true}
+	msg.post("@render:", "use_stretch_projection", { near = -1, far = 1 })
+	--msg.post("@render:", "use_fixed_fit_projection", { near = -1, far = 1 })
+	--msg.post("@render:", "use_fixed_projection", { near = -1, far = 1, zoom = 2 })
+	math.randomseed(os.time())
+	math.random();math.random();math.random(); -- discard first few random numbers
+	print("startup url: "..msg.url())
+	msg.post("handler#game", "load")
+	--msg.post("handler#gamewon", "load")
+	msg.post(".", "acquire_input_focus")
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	-- Add update code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function on_message(self, message_id, message, sender)
+	if(message_id == hash("show_game")) then
+		if self.controller_states["menu"] then 
+			msg.post("handler#menu", "unload") 
+			self.controller_states["menu"]=false
+		end		
+		self.controller_states["game"]=true
+		msg.post("handler#game", "load")
+	elseif(message_id == hash("show_menu")) then
+		if self.controller_states["game"] then 
+			msg.post("handler#game", "unload") 
+			self.controller_states["game"]=false
+		end
+		self.controller_states["menu"]=true
+		msg.post("handler#menu", "load")
+	elseif message_id == hash("proxy_loaded") then	
+		msg.post(sender, "enable")	
+	end
+end
+
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end

@@ -1,0 +1,94 @@
+name: "game"
+instances {
+  id: "game-peg0"
+  prototype: "/game/game-peg.go"
+  position {
+    x: 321.0
+    y: 877.0
+    z: 1.0
+  }
+}
+instances {
+  id: "game-peg1"
+  prototype: "/game/game-peg.go"
+  position {
+    x: 157.0
+    y: 687.0
+    z: 1.0
+  }
+}
+instances {
+  id: "game-peg2"
+  prototype: "/game/game-peg.go"
+  position {
+    x: 487.0
+    y: 694.0
+    z: 1.0
+  }
+}
+instances {
+  id: "game-peg3"
+  prototype: "/game/game-peg.go"
+  position {
+    x: 321.0
+    y: 501.0
+    z: 1.0
+  }
+}
+scale_along_z: 0
+embedded_instances {
+  id: "back"
+  data: "embedded_components {\n"
+  "  id: \"sprite\"\n"
+  "  type: \"sprite\"\n"
+  "  data: \"default_animation: \\\"back-1\\\"\\n"
+  "material: \\\"/builtins/materials/sprite.material\\\"\\n"
+  "textures {\\n"
+  "  sampler: \\\"texture_sampler\\\"\\n"
+  "  texture: \\\"/main/main.atlas\\\"\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+}
+embedded_instances {
+  id: "board"
+  children: "cursor"
+  children: "game-peg0"
+  children: "game-peg1"
+  children: "game-peg2"
+  children: "game-peg3"
+  data: "components {\n"
+  "  id: \"board\"\n"
+  "  component: \"/game/board.script\"\n"
+  "}\n"
+  ""
+}
+embedded_instances {
+  id: "cursor"
+  data: "embedded_components {\n"
+  "  id: \"collisionobject\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"type: COLLISION_OBJECT_TYPE_DYNAMIC\\n"
+  "mass: 1.0\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"default\\\"\\n"
+  "mask: \\\"default\\\"\\n"
+  "embedded_collision_shape {\\n"
+  "  shapes {\\n"
+  "    shape_type: TYPE_SPHERE\\n"
+  "    position {\\n"
+  "    }\\n"
+  "    rotation {\\n"
+  "    }\\n"
+  "    index: 0\\n"
+  "    count: 1\\n"
+  "    id: \\\"hit\\\"\\n"
+  "  }\\n"
+  "  data: 2.0\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+}
