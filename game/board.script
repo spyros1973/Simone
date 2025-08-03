@@ -1,9 +1,15 @@
+local MSG_HIT = hash("hit")
+
 local pegs={"game-peg0","game-peg1","game-peg2","game-peg3"}
 local state="show" --show|play
 local round=1 --difficulty, determines chain length and (later) number of buttons
 local chain_to_show={}
 local chain_to_enter={}
 local chain_playback_counter=0
+
+--local lbl_prompt = msg.url("#lbl-prompt")
+
+
 
 function get_chain(self)
 	local ret={}
@@ -17,25 +23,39 @@ function get_chain(self)
 	return ret
 end
 
+function prepare_next_round(self)
+	state="show"
+	round = round + 1
+	chain_to_show=get_chain(self)
+	chain_to_enter={}
+	for i=1,#chain_to_show do
+		table.insert(chain_to_enter,chain_to_show[i])
+	end
+
+	label.set_text("#lbl-prompt", "Memorize the sequence")	
+end
+
 function reset_game(self) 
-	self.round=1
+	round=0
 	local sprites={"Match3Clover","Match3Heart","Match3Moon","Match3Star"}
 	for i, v in ipairs(pegs) do		
 		print ("setting "..v.." to "..sprites[i])
 		msg.post(v, "config", {sprite = sprites[i], order = i})
 	end	
-	chain_to_show=get_chain(self)
+	prepare_next_round(self)
 end
+
+
 
 function init(self)
 	msg.post(".", "acquire_input_focus")
+	print ("label url is "..msg.url("#lbl-prompt"))
+	msg.post(msg.url("#lbl-prompt"), "enable")
 	reset_game(self)
 end
 
 function final(self)
-	-- Add finalization code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
+	msg.post(".", "release_input_focus")
 end
 
 function update(self, dt)
@@ -49,21 +69,21 @@ function update(self, dt)
 		end
 	end
 		
-	if #chain_to_show==0 then
+	if #chain_to_show==0 and state=="show" then
 		state="play"
 		for i, v in ipairs(pegs) do					
 			msg.post(v, "activate")
 		end	
+		label.set_text("#lbl-prompt", "Replay the sequence")	
 	end
 	
-	if state=="play" then
+	if state=="play" then		
 		if #chain_to_enter==0 then
-			print ("round won - go to next")
+			prepare_next_round(self)
+			print ("current round = "..tostring(round))
+			--print ("round won - go to next")
 		end
 	end
-	-- Add update code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
 end
 
 function fixed_update(self, dt)
@@ -76,14 +96,30 @@ function fixed_update(self, dt)
 end
 
 function on_message(self, message_id, message, sender)
-	-- Add message-handling code here
-	-- Learn more: https://defold.com/manuals/message-passing/
-	-- Remove this function if not needed
+	if message_id==MSG_HIT then
+		print ("receive hit for peg with order = "..message.order)
+		if #chain_to_enter>1 then
+			if chain_to_enter[1]==message.order then
+				print ("ok so far")
+				table.remove(chain_to_enter,1)
+				print ("Remaining pegs: "..tostring(#chain_to_enter))
+			end
+		end
+	end
+	--print("message "..hash(message_id).." received on "..tostring(self))
 end
 
 function on_input(self, action_id, action)
-	local pos = vmath.vector3(action.x, action.y, 0)
-	go.set_position(pos, "cursor")
+	if action_id == hash("touch") then
+		local pos = vmath.vector3(action.x, action.y, 0)
+		go.set_position(pos, "cursor")
+	end
+
+	if action_id == hash("escape") and action.released then
+		--msg.post("/sound_manager", "play_sample",{sample="button"})
+		msg.post("startup:/handler#startup", "show_menu")
+	end
+	
 	-- Add input-handling code here. The game object this script is attached to
 	-- must have acquired input focus:
 	--

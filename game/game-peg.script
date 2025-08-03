@@ -1,7 +1,3 @@
-local mouse_pressed=false
-local my_parent=nil
-local active=false
-
 --hashes used
 local MSG_CONFIG = hash("config")
 local MSG_TRIGGER_RESPONSE = hash("trigger_response")
@@ -15,6 +11,10 @@ end
 
 function init(self)
 	msg.post(".", "acquire_input_focus")
+	self.mouse_pressed=false
+	self.my_parent=nil
+	self.active=false
+		
 end
 
 function final(self)
@@ -61,7 +61,7 @@ function on_message(self, message_id, message, sender)
 	if message_id==MSG_TRIGGER_RESPONSE and message.other_id==hash("/cursor") and self.mouse_pressed then
 		--print ("collison with cursor")
 		play_hit_anim(self)
-		msg.post(self.my_parent, "hit")
+		msg.post(self.my_parent, "hit", {order = self.order})
 		--go.delete()
 		--print (message.other_id)
 	end
