@@ -15,6 +15,7 @@ function get_chain(self)
 	local ret={}
 	local pegs_count=#pegs	
 	for i = 1, 3+round, 1 do
+		print ("adding "..tostring(i))
 		table.insert(ret,math.random(pegs_count))
 	end
 	for i = 1, #ret do
@@ -26,13 +27,17 @@ end
 function prepare_next_round(self)
 	state="show"
 	round = round + 1
+	label.set_text("#lbl-round", "Round: "..tostring(round))
 	chain_to_show=get_chain(self)
+	for i=1,#chain_to_show do print ("toshow: "..tostring(chain_to_show[i])) end				
+	
 	chain_to_enter={}
 	for i=1,#chain_to_show do
 		table.insert(chain_to_enter,chain_to_show[i])
 	end
-
-	label.set_text("#lbl-prompt", "Memorize the sequence")	
+	for i=1,#chain_to_enter do print ("initial: "..tostring(chain_to_enter[i])) end				
+	
+	label.set_text("#lbl-prompt", "Memorize the sequence")
 end
 
 function reset_game(self) 
@@ -98,10 +103,14 @@ end
 function on_message(self, message_id, message, sender)
 	if message_id==MSG_HIT then
 		print ("receive hit for peg with order = "..message.order)
-		if #chain_to_enter>1 then
+		if #chain_to_enter>0 then
 			if chain_to_enter[1]==message.order then
 				print ("ok so far")
+				
+				for i=1,#chain_to_enter do print ("before: "..tostring(chain_to_enter[i])) end				
 				table.remove(chain_to_enter,1)
+				for i=1,#chain_to_enter do print ("after: "..tostring(chain_to_enter[i])) end
+				
 				print ("Remaining pegs: "..tostring(#chain_to_enter))
 			end
 		end
