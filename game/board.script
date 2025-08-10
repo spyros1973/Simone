@@ -1,17 +1,20 @@
+local game_vars=require("game_vars")
+
 local MSG_HIT = hash("hit")
 
 local pegs={"game-peg0","game-peg1","game-peg2","game-peg3"}
-local state="show" --show|play
+local peg_sounds={"peg_hit_1","peg_hit_2","peg_hit_3","peg_hit_4"}
+local state="show" --show|play|countdown
 local round=1 --difficulty, determines chain length and (later) number of buttons
+local lives=3
 local chain_to_show={}
 local chain_to_enter={}
-local chain_playback_counter=0
+local playback_counter=0
+local countdown=0
 
 --local lbl_prompt = msg.url("#lbl-prompt")
 
-
-
-function get_chain(self)
+local function get_chain(self)
 	local ret={}
 	local pegs_count=#pegs	
 	for i = 1, 3+round, 1 do
@@ -24,10 +27,15 @@ function get_chain(self)
 	return ret
 end
 
-function prepare_next_round(self)
-	state="show"
+local function prepare_next_round(self)
+	state="countdown"
+	countdown=4
 	round = round + 1
 	label.set_text("#lbl-round", "Round: "..tostring(round))
+	--go.set("#lbl-counter", "outline.w", 4)
+	--go.set("#lbl-counter", "outline", vmath.vector4(8, 0, 0, 0))
+	go.set("#lbl-counter", "outline", vmath.vector4(4, 0, 0, 0))
+	go.set("#lbl-counter", "shadow", vmath.vector4(0, 0, 1, 1)) -- Blue outline
 	chain_to_show=get_chain(self)
 	for i=1,#chain_to_show do print ("toshow: "..tostring(chain_to_show[i])) end				
 	
@@ -37,50 +45,77 @@ function prepare_next_round(self)
 	end
 	for i=1,#chain_to_enter do print ("initial: "..tostring(chain_to_enter[i])) end				
 	
-	label.set_text("#lbl-prompt", "Memorize the sequence")
+	label.set_text("#lbl-prompt-1", "Memorize the sequence")
+	msg.post(msg.url("#lbl-prompt-2"), "enable")
+	label.set_text("#lbl-prompt-2", tostring(#chain_to_enter).." moves to memorize")
+	label.set_text("#lbl-counter","Round "..tostring(round))
+	msg.post(msg.url("#lbl-counter"), "enable")
+	go.set("#lbl-counter", "scale.x", 1)
+	go.set("#lbl-counter", "scale.y", 1)
 end
 
-function reset_game(self) 
-	round=0
+local function reset_game(self) 
+	round=0	
+	msg.post("/lives#lives", "set_lives", {lives=lives})
 	local sprites={"Match3Clover","Match3Heart","Match3Moon","Match3Star"}
 	for i, v in ipairs(pegs) do		
 		print ("setting "..v.." to "..sprites[i])
-		msg.post(v, "config", {sprite = sprites[i], order = i})
+		msg.post(v, "config", {sprite = sprites[i], order = i, sound = peg_sounds[i]})
 	end	
 	prepare_next_round(self)
 end
 
-
-
 function init(self)
 	msg.post(".", "acquire_input_focus")
-	print ("label url is "..msg.url("#lbl-prompt"))
-	msg.post(msg.url("#lbl-prompt"), "enable")
+	print ("label url is "..msg.url("#lbl-prompt-1"))
+	msg.post(msg.url("#lbl-prompt-1"), "enable")
+	msg.post(msg.url("#lbl-prompt-2"), "enable")
 	reset_game(self)
 end
 
 function final(self)
 	msg.post(".", "release_input_focus")
 end
+local function on_countdown_click()
+	playback_counter=0
+	countdown=countdown-1
+	if countdown==0 then
+		msg.post(msg.url("#lbl-counter"), "disable")
+		state="show"
+	end
+	
+	label.set_text("#lbl-counter",tostring(countdown))
+	go.set("#lbl-counter", "scale.x", 1)
+	go.set("#lbl-counter", "scale.y", 1)
+
+end
 
 function update(self, dt)
+	if state=="countdown" then
+		if playback_counter ==0 then
+			playback_counter=1
+			go.animate("#lbl-counter", "scale", go.PLAYBACK_ONCE_FORWARD,  vmath.vector3(16, 16, 1), go.EASING_INOUTQUAD, 1,0,on_countdown_click)
+		end	
+	end
+
 	if state=="show" then
-		chain_playback_counter = chain_playback_counter + 1/60
-		if chain_playback_counter>1 then
+		playback_counter = playback_counter + dt
+		if playback_counter>1 then
 			print("showing "..tostring(chain_to_show[1]))
-			msg.post(pegs[chain_to_show[1]], "play")
+			msg.post(pegs[chain_to_show[1]], "play")			
 			table.remove(chain_to_show,1)
-			chain_playback_counter=0
+			playback_counter=0
+		end
+		if #chain_to_show==0 then
+			state="play"
+			for i, v in ipairs(pegs) do					
+				msg.post(v, "activate")
+			end	
+			label.set_text("#lbl-prompt-1", "Replay the sequence")	
+			msg.post(msg.url("#lbl-prompt-2"), "disable")
 		end
 	end
 		
-	if #chain_to_show==0 and state=="show" then
-		state="play"
-		for i, v in ipairs(pegs) do					
-			msg.post(v, "activate")
-		end	
-		label.set_text("#lbl-prompt", "Replay the sequence")	
-	end
 	
 	if state=="play" then		
 		if #chain_to_enter==0 then
@@ -91,14 +126,6 @@ function update(self, dt)
 	end
 end
 
-function fixed_update(self, dt)
-	-- This function is called if 'Fixed Update Frequency' is enabled in the Engine section of game.project
-	-- Can be coupled with fixed updates of the physics simulation if 'Use Fixed Timestep' is enabled in
-	-- Physics section of game.project
-	-- Add update code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
-end
 
 function on_message(self, message_id, message, sender)
 	if message_id==MSG_HIT then
@@ -112,6 +139,16 @@ function on_message(self, message_id, message, sender)
 				for i=1,#chain_to_enter do print ("after: "..tostring(chain_to_enter[i])) end
 				
 				print ("Remaining pegs: "..tostring(#chain_to_enter))
+			else
+				print ("wrong peg!")
+				lives=lives-1
+				msg.post("/lives#lives", "set_lives", {lives=lives})
+				if lives==0 then
+					game_vars.score=round --to be used by the game over collection
+					print("game over")
+					--back to menu for now, should have proper game over screen, leaderboards etc
+					msg.post("startup:/handler#startup", "show_menu")
+				end
 			end
 		end
 	end
@@ -127,21 +164,5 @@ function on_input(self, action_id, action)
 	if action_id == hash("escape") and action.released then
 		--msg.post("/sound_manager", "play_sample",{sample="button"})
 		msg.post("startup:/handler#startup", "show_menu")
-	end
-	
-	-- Add input-handling code here. The game object this script is attached to
-	-- must have acquired input focus:
-	--
-	--    msg.post(".", "acquire_input_focus")
-	--
-	-- All mapped input bindings will be received. Mouse and touch input will
-	-- be received regardless of where on the screen it happened.
-	-- Learn more: https://defold.com/manuals/input/
-	-- Remove this function if not needed
-end
-
-function on_reload(self)
-	-- Add reload-handling code here
-	-- Learn more: https://defold.com/manuals/hot-reload/
-	-- Remove this function if not needed
+	end	
 end

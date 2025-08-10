@@ -47,10 +47,12 @@ function on_message(self, message_id, message, sender)
 		self.my_parent=sender
 		msg.post("#sprite", "play_animation", {id = hash(message.sprite)})
 		self.order=message.order
+		self.sound=message.sound
 	end
 
 	if message_id==MSG_PLAY then
 		print("play message received on "..tostring(self))
+		msg.post("/sound_manager", "play_sample",{sample=self.sound})
 		play_hit_anim(self)
 	end	
 
@@ -60,6 +62,7 @@ function on_message(self, message_id, message, sender)
 		
 	if message_id==MSG_TRIGGER_RESPONSE and message.other_id==hash("/cursor") and self.mouse_pressed then
 		--print ("collison with cursor")
+		msg.post("/sound_manager", "play_sample",{sample=self.sound})
 		play_hit_anim(self)
 		msg.post(self.my_parent, "hit", {order = self.order})
 		--go.delete()

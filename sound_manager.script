@@ -1,0 +1,14 @@
+local settings = require("settings")
+
+local MSG_PLAY_SAMPLE = hash("play_sample")
+
+function init(self)
+	settings.load()
+	--play_sound=settings.play_sound
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == MSG_PLAY_SAMPLE and settings.sound then
+		sound.play("#"..message.sample,{gain=settings.volume})
+	end
+end
