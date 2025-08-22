@@ -1,5 +1,5 @@
 function init(self)
-	self.controller_states={menu=true,game=false}
+	self.controller_states={menu=true,game=false,gameover=false}
 	msg.post("@render:", "use_stretch_projection", { near = -1, far = 1 })
 	--msg.post("@render:", "use_fixed_fit_projection", { near = -1, far = 1 })
 	--msg.post("@render:", "use_fixed_projection", { near = -1, far = 1, zoom = 2 })
@@ -23,22 +23,31 @@ function update(self, dt)
 	-- Remove this function if not needed
 end
 
+local function unload_collection(self,name)
+	if self.controller_states[name] then 
+		msg.post("handler#"..name, "unload") 
+		self.controller_states[name]=false
+	end
+end
+
 function on_message(self, message_id, message, sender)
 	if(message_id == hash("show_game")) then
-		if self.controller_states["menu"] then 
-			msg.post("handler#menu", "unload") 
-			self.controller_states["menu"]=false
-		end		
+		unload_collection(self,"menu")
+		unload_collection(self,"gameover")
 		self.controller_states["game"]=true
 		msg.post("handler#game", "load")
 	elseif(message_id == hash("show_menu")) then
-		if self.controller_states["game"] then 
-			msg.post("handler#game", "unload") 
-			self.controller_states["game"]=false
-		end
+		unload_collection(self,"game")
+		unload_collection(self,"gameover")		
 		self.controller_states["menu"]=true
 		msg.post("handler#menu", "load")
+	elseif(message_id == hash("show_gameover")) then
+		unload_collection(self,"menu")
+		unload_collection(self,"game")
+		self.controller_states["gameover"]=true
+		msg.post("handler#gameover", "load")	
 	elseif message_id == hash("proxy_loaded") then	
+		msg.post(sender, "init")
 		msg.post(sender, "enable")	
 	end
 end

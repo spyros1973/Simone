@@ -2,9 +2,6 @@ images {
   image: "/assets/app_icons/icon_180.png"
 }
 images {
-  image: "/assets/background.png"
-}
-images {
   image: "/assets/Match3Clover.png"
 }
 images {
@@ -26,5 +23,29 @@ images {
 }
 images {
   image: "/assets/Heart1.png"
+}
+images {
+  image: "/assets/board.png"
+}
+images {
+  image: "/assets/peg-blue.png"
+}
+images {
+  image: "/assets/peg-green.png"
+}
+images {
+  image: "/assets/peg-red.png"
+}
+images {
+  image: "/assets/peg-yellow.png"
+}
+images {
+  image: "/assets/bar-yellow.png"
+}
+images {
+  image: "/assets/board-green.png"
+}
+images {
+  image: "/assets/board-red.png"
 }
 extrude_borders: 2

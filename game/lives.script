@@ -1,4 +1,7 @@
 local MSG_SET_LIVES = hash("set_lives")
+local MSG_RESET = hash("reset")
+
+local lives=-1
 
 function init(self)
 	--print(msg.url())
@@ -6,14 +9,33 @@ end
 
 
 function on_message(self, message_id, message, sender)
+	if message_id == MSG_RESET then
+		lives=3
+	end
 	if message_id==MSG_SET_LIVES then
+		print ("received set_lives with value = "..tostring(message.lives))
 		for i=5,1,-1 do
 			if message.lives < i then
 				msg.post(msg.url("#life-"..tostring(i)), "disable")
+				print ("hiding ".."#life-"..tostring(i))
 			else
 				msg.post(msg.url("#life-"..tostring(i)), "enable")
 			end
 		end
+		print ("local lives = "..tostring(lives))
+		if message.lives<lives and lives>0 and lives<=5 then --not on the beginning
+			local life_lost_url="#life-"..tostring(lives)
+			print ("entered lives anim and hiding "..life_lost_url)
+			msg.post(msg.url(life_lost_url), "enable") --reenable for anim
+			print ("showing "..life_lost_url)
+			go.animate(life_lost_url, "scale", go.PLAYBACK_ONCE_FORWARD, vmath.vector3(0,0,0), go.EASING_INBOUNCE, .5, 0, function() 
+				msg.post(msg.url(life_lost_url), "disable")
+				print("hiding "..life_lost_url)
+			end)						
+		end
+		lives=message.lives
+				
 	end
+
 end
 

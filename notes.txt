@@ -1,6 +1,10 @@
 (OK) Add countdown timer before playing sequence
 (OK) Write how many items are in a sequence (below "Memorize the sequence" have "4 sounds to memorize")
 (ok) Assign different samples to each item in sequence (make sounds 1 on 1 with each graphic)
-(ok) On wrong entry, it's game over / alt. lose life - you start with 3
+(ok) On wrong entry, lose life - you start with 3
+(ok) Add game over screen
+(ok) Show wrong-right answer with flashing inner circle
+(ok) Show scrolling message after success - "n to go"
+(ok) Add life loss anim
 Allow practice mode before game
-Add game over screen
+Add some life win scheme

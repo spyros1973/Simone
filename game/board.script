@@ -17,12 +17,12 @@ local countdown=0
 local function get_chain(self)
 	local ret={}
 	local pegs_count=#pegs	
-	for i = 1, 3+round, 1 do
-		print ("adding "..tostring(i))
+	for i = 1, 2+round, 1 do
+		--print ("adding "..tostring(i))
 		table.insert(ret,math.random(pegs_count))
 	end
 	for i = 1, #ret do
-		print (ret[i])
+		--print (ret[i])
 	end
 	return ret
 end
@@ -37,13 +37,13 @@ local function prepare_next_round(self)
 	go.set("#lbl-counter", "outline", vmath.vector4(4, 0, 0, 0))
 	go.set("#lbl-counter", "shadow", vmath.vector4(0, 0, 1, 1)) -- Blue outline
 	chain_to_show=get_chain(self)
-	for i=1,#chain_to_show do print ("toshow: "..tostring(chain_to_show[i])) end				
+	--for i=1,#chain_to_show do print ("toshow: "..tostring(chain_to_show[i])) end				
 	
 	chain_to_enter={}
 	for i=1,#chain_to_show do
 		table.insert(chain_to_enter,chain_to_show[i])
 	end
-	for i=1,#chain_to_enter do print ("initial: "..tostring(chain_to_enter[i])) end				
+	--for i=1,#chain_to_enter do print ("initial: "..tostring(chain_to_enter[i])) end				
 	
 	label.set_text("#lbl-prompt-1", "Memorize the sequence")
 	msg.post(msg.url("#lbl-prompt-2"), "enable")
@@ -57,17 +57,23 @@ end
 local function reset_game(self) 
 	round=0	
 	msg.post("/lives#lives", "set_lives", {lives=lives})
-	local sprites={"Match3Clover","Match3Heart","Match3Moon","Match3Star"}
+	--local sprites={"Match3Clover","Match3Heart","Match3Moon","Match3Star"}
+	local sprites={"peg-red","peg-green","peg-blue","peg-yellow"}
+	
 	for i, v in ipairs(pegs) do		
-		print ("setting "..v.." to "..sprites[i])
+		--print ("setting "..v.." to "..sprites[i])
 		msg.post(v, "config", {sprite = sprites[i], order = i, sound = peg_sounds[i]})
 	end	
 	prepare_next_round(self)
 end
 
+local function reset_game_board_sprite()
+	msg.post("#game-board", "play_animation", {id = hash("board")})	
+end
+
 function init(self)
 	msg.post(".", "acquire_input_focus")
-	print ("label url is "..msg.url("#lbl-prompt-1"))
+	--print ("label url is "..msg.url("#lbl-prompt-1"))
 	msg.post(msg.url("#lbl-prompt-1"), "enable")
 	msg.post(msg.url("#lbl-prompt-2"), "enable")
 	reset_game(self)
@@ -76,6 +82,7 @@ end
 function final(self)
 	msg.post(".", "release_input_focus")
 end
+
 local function on_countdown_click()
 	playback_counter=0
 	countdown=countdown-1
@@ -94,14 +101,16 @@ function update(self, dt)
 	if state=="countdown" then
 		if playback_counter ==0 then
 			playback_counter=1
-			go.animate("#lbl-counter", "scale", go.PLAYBACK_ONCE_FORWARD,  vmath.vector3(16, 16, 1), go.EASING_INOUTQUAD, 1,0,on_countdown_click)
+			local scale=16
+			if countdown==4 then scale=8 end
+			go.animate("#lbl-counter", "scale", go.PLAYBACK_ONCE_FORWARD,  vmath.vector3(scale, scale, 1), go.EASING_INOUTQUAD, 1,0,on_countdown_click)
 		end	
 	end
 
 	if state=="show" then
 		playback_counter = playback_counter + dt
 		if playback_counter>1 then
-			print("showing "..tostring(chain_to_show[1]))
+			--print("showing "..tostring(chain_to_show[1]))
 			msg.post(pegs[chain_to_show[1]], "play")			
 			table.remove(chain_to_show,1)
 			playback_counter=0
@@ -120,7 +129,7 @@ function update(self, dt)
 	if state=="play" then		
 		if #chain_to_enter==0 then
 			prepare_next_round(self)
-			print ("current round = "..tostring(round))
+			--print ("current round = "..tostring(round))
 			--print ("round won - go to next")
 		end
 	end
@@ -132,22 +141,37 @@ function on_message(self, message_id, message, sender)
 		print ("receive hit for peg with order = "..message.order)
 		if #chain_to_enter>0 then
 			if chain_to_enter[1]==message.order then
-				print ("ok so far")
-				
-				for i=1,#chain_to_enter do print ("before: "..tostring(chain_to_enter[i])) end				
+				--print ("ok so far")
+				msg.post("#game-board", "play_animation", {id = hash("board-green")})
+				go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.5, 1.5, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)
+				--for i=1,#chain_to_enter do print ("before: "..tostring(chain_to_enter[i])) end
 				table.remove(chain_to_enter,1)
-				for i=1,#chain_to_enter do print ("after: "..tostring(chain_to_enter[i])) end
-				
-				print ("Remaining pegs: "..tostring(#chain_to_enter))
+				--for i=1,#chain_to_enter do print ("after: "..tostring(chain_to_enter[i])) end
+				local remaining=""
+				if #chain_to_enter>1 then
+					remaining = tostring(#chain_to_enter).." remaining"
+				elseif #chain_to_enter==1 then
+					remaining = "One to go!"
+				end
+				--print ("setting text to "..remaining)
+				label.set_text("scroller#lbl-message",remaining)
+				local sp=go.get_position("scroller")
+				--go.set("#lbl-msg-scroll", "position", vmath.vector3(650,sp.y,sp.z))
+				go.set_position(vmath.vector3(650,sp.y,sp.z), "scroller")
+				go.animate("scroller", "position.x", go.PLAYBACK_ONCE_FORWARD,-300, go.EASING_INOUTQUAD, 2.5,0)
+				--go.set_position(vmath.vector3(1200, self.initial_pos.y, self.initial_pos.z), self.label_object)
+				--print ("Remaining pegs: "..tostring(#chain_to_enter))
 			else
-				print ("wrong peg!")
+				--print ("wrong peg!")
+				msg.post("#game-board", "play_animation", {id = hash("board-red")})
+				go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.5, 1.5, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)
 				lives=lives-1
 				msg.post("/lives#lives", "set_lives", {lives=lives})
 				if lives==0 then
 					game_vars.score=round --to be used by the game over collection
 					print("game over")
 					--back to menu for now, should have proper game over screen, leaderboards etc
-					msg.post("startup:/handler#startup", "show_menu")
+					msg.post("startup:/handler#startup", "show_gameover")
 				end
 			end
 		end
