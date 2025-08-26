@@ -14,6 +14,13 @@ local countdown=0
 
 --local lbl_prompt = msg.url("#lbl-prompt")
 
+local function scroll_message(txt)
+	label.set_text("scroller#lbl-message",txt)
+	local sp=go.get_position("scroller")
+	go.set_position(vmath.vector3(650,sp.y,sp.z), "scroller")
+	go.animate("scroller", "position.x", go.PLAYBACK_ONCE_FORWARD,-300, go.EASING_INOUTQUAD, 2.5,0)	
+end
+
 local function get_chain(self)
 	local ret={}
 	local pegs_count=#pegs	
@@ -64,6 +71,8 @@ local function reset_game(self)
 		--print ("setting "..v.." to "..sprites[i])
 		msg.post(v, "config", {sprite = sprites[i], order = i, sound = peg_sounds[i]})
 	end	
+	msg.post("/btn-practice", "config", {cursor="/cursor",text="hello!"})
+	msg.post("/btn-practice", "deactivate")
 	prepare_next_round(self)
 end
 
@@ -89,6 +98,7 @@ local function on_countdown_click()
 	if countdown==0 then
 		msg.post(msg.url("#lbl-counter"), "disable")
 		state="show"
+		msg.post("/btn-practice", "activate")
 	end
 	
 	label.set_text("#lbl-counter",tostring(countdown))
@@ -152,13 +162,11 @@ function on_message(self, message_id, message, sender)
 					remaining = tostring(#chain_to_enter).." remaining"
 				elseif #chain_to_enter==1 then
 					remaining = "One to go!"
+				else
+					remaining = "Well done!"
 				end
 				--print ("setting text to "..remaining)
-				label.set_text("scroller#lbl-message",remaining)
-				local sp=go.get_position("scroller")
-				--go.set("#lbl-msg-scroll", "position", vmath.vector3(650,sp.y,sp.z))
-				go.set_position(vmath.vector3(650,sp.y,sp.z), "scroller")
-				go.animate("scroller", "position.x", go.PLAYBACK_ONCE_FORWARD,-300, go.EASING_INOUTQUAD, 2.5,0)
+				scroll_message(remaining)
 				--go.set_position(vmath.vector3(1200, self.initial_pos.y, self.initial_pos.z), self.label_object)
 				--print ("Remaining pegs: "..tostring(#chain_to_enter))
 			else
@@ -168,7 +176,7 @@ function on_message(self, message_id, message, sender)
 				lives=lives-1
 				msg.post("/lives#lives", "set_lives", {lives=lives})
 				if lives==0 then
-					game_vars.score=round --to be used by the game over collection
+					game_vars.score=round-1 --to be used by the game over collection
 					print("game over")
 					--back to menu for now, should have proper game over screen, leaderboards etc
 					msg.post("startup:/handler#startup", "show_gameover")

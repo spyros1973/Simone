@@ -48,4 +48,7 @@ images {
 images {
   image: "/assets/board-red.png"
 }
+images {
+  image: "/assets/button-default.png"
+}
 extrude_borders: 2

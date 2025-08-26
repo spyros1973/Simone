@@ -64,6 +64,14 @@ instances {
     z: 1.0
   }
 }
+instances {
+  id: "btn-practice"
+  prototype: "/game/button.go"
+  position {
+    x: 571.0
+    y: 39.0
+  }
+}
 scale_along_z: 0
 embedded_instances {
   id: "back"
@@ -85,6 +93,7 @@ embedded_instances {
 }
 embedded_instances {
   id: "board"
+  children: "btn-practice"
   children: "cursor"
   children: "game-peg0"
   children: "game-peg1"
