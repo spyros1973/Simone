@@ -68,7 +68,7 @@ instances {
   id: "btn-practice"
   prototype: "/game/button.go"
   position {
-    x: 571.0
+    x: 550.0
     y: 39.0
   }
 }
@@ -88,7 +88,7 @@ embedded_instances {
   "}\n"
   ""
   position {
-    x: 1500.0
+    x: 650.0
   }
 }
 embedded_instances {

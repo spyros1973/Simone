@@ -26,7 +26,7 @@ embedded_components {
   "  w: 12.0\n"
   "}\n"
   "size {\n"
-  "  x: 128.0\n"
+  "  x: 164.0\n"
   "  y: 64.0\n"
   "}\n"
   "size_mode: SIZE_MODE_MANUAL\n"

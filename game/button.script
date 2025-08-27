@@ -33,10 +33,12 @@ function on_message(self, message_id, message, sender)
 	end
 	
 	if message_id == MSG_CONFIG then
-		self.cursor=message.cursor
+		if message.cursor ~= nil then
+			self.cursor=message.cursor
+		end
 		self.my_parent=sender
 		label.set_text("#label", message.text)
-		print ("cursor is "..self.cursor)
+		--print ("cursor is "..self.cursor)
 	end
 
 	if message_id==MSG_TRIGGER_RESPONSE and self.active==true and message.other_id==hash(self.cursor) and self.mouse_pressed then
