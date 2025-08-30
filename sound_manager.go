@@ -32,3 +32,27 @@ embedded_components {
   data: "sound: \"/assets/sounds/peg_hit.wav\"\n"
   ""
 }
+embedded_components {
+  id: "do"
+  type: "sound"
+  data: "sound: \"/assets/sounds/do.wav\"\n"
+  ""
+}
+embedded_components {
+  id: "re"
+  type: "sound"
+  data: "sound: \"/assets/sounds/re.wav\"\n"
+  ""
+}
+embedded_components {
+  id: "mi"
+  type: "sound"
+  data: "sound: \"/assets/sounds/mi.wav\"\n"
+  ""
+}
+embedded_components {
+  id: "fa"
+  type: "sound"
+  data: "sound: \"/assets/sounds/fa.wav\"\n"
+  ""
+}

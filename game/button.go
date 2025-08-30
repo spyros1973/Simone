@@ -32,7 +32,7 @@ embedded_components {
   "size_mode: SIZE_MODE_MANUAL\n"
   "textures {\n"
   "  sampler: \"texture_sampler\"\n"
-  "  texture: \"/main/main.atlas\"\n"
+  "  texture: \"/assets/main.atlas\"\n"
   "}\n"
   ""
 }

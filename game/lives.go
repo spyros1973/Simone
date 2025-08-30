@@ -9,7 +9,7 @@ embedded_components {
   "material: \"/builtins/materials/sprite.material\"\n"
   "textures {\n"
   "  sampler: \"texture_sampler\"\n"
-  "  texture: \"/main/main.atlas\"\n"
+  "  texture: \"/assets/main.atlas\"\n"
   "}\n"
   ""
   position {
@@ -31,7 +31,7 @@ embedded_components {
   "}\n"
   "textures {\n"
   "  sampler: \"texture_sampler\"\n"
-  "  texture: \"/main/main.atlas\"\n"
+  "  texture: \"/assets/main.atlas\"\n"
   "}\n"
   ""
   position {
@@ -53,7 +53,7 @@ embedded_components {
   "}\n"
   "textures {\n"
   "  sampler: \"texture_sampler\"\n"
-  "  texture: \"/main/main.atlas\"\n"
+  "  texture: \"/assets/main.atlas\"\n"
   "}\n"
   ""
   position {
@@ -75,7 +75,7 @@ embedded_components {
   "}\n"
   "textures {\n"
   "  sampler: \"texture_sampler\"\n"
-  "  texture: \"/main/main.atlas\"\n"
+  "  texture: \"/assets/main.atlas\"\n"
   "}\n"
   ""
   position {
@@ -97,7 +97,7 @@ embedded_components {
   "}\n"
   "textures {\n"
   "  sampler: \"texture_sampler\"\n"
-  "  texture: \"/main/main.atlas\"\n"
+  "  texture: \"/assets/main.atlas\"\n"
   "}\n"
   ""
   position {

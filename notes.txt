@@ -6,6 +6,6 @@
 (ok) Show wrong-right answer with flashing inner circle
 (ok) Show scrolling message after success - "n to go"
 (ok) Add life loss anim
-Allow practice mode before game
+(ok) Allow practice mode before game
 Add a more suitable, maybe colored, font (https://defold.com/manuals/font/)
 Maybe add some life win scheme

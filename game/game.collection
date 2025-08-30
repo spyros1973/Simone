@@ -78,18 +78,15 @@ embedded_instances {
   data: "embedded_components {\n"
   "  id: \"sprite\"\n"
   "  type: \"sprite\"\n"
-  "  data: \"default_animation: \\\"back-1\\\"\\n"
+  "  data: \"default_animation: \\\"back-2\\\"\\n"
   "material: \\\"/builtins/materials/sprite.material\\\"\\n"
   "textures {\\n"
   "  sampler: \\\"texture_sampler\\\"\\n"
-  "  texture: \\\"/main/main.atlas\\\"\\n"
+  "  texture: \\\"/assets/main.atlas\\\"\\n"
   "}\\n"
   "\"\n"
   "}\n"
   ""
-  position {
-    x: 650.0
-  }
 }
 embedded_instances {
   id: "board"
@@ -198,7 +195,7 @@ embedded_instances {
   "material: \\\"/builtins/materials/sprite.material\\\"\\n"
   "textures {\\n"
   "  sampler: \\\"texture_sampler\\\"\\n"
-  "  texture: \\\"/main/main.atlas\\\"\\n"
+  "  texture: \\\"/assets/main.atlas\\\"\\n"
   "}\\n"
   "\"\n"
   "  position {\n"
@@ -222,7 +219,7 @@ embedded_instances {
   "}\\n"
   "textures {\\n"
   "  sampler: \\\"texture_sampler\\\"\\n"
-  "  texture: \\\"/main/main.atlas\\\"\\n"
+  "  texture: \\\"/assets/main.atlas\\\"\\n"
   "}\\n"
   "\"\n"
   "  position {\n"

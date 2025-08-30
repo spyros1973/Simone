@@ -4,7 +4,8 @@ local MSG_HIT = hash("hit")
 local MSG_BUTTON_TOUCH = hash("button_touch")
 
 local pegs={"game-peg0","game-peg1","game-peg2","game-peg3"}
-local peg_sounds={"peg_hit_1","peg_hit_2","peg_hit_3","peg_hit_4"}
+--local peg_sounds={"peg_hit_1","peg_hit_2","peg_hit_3","peg_hit_4"}
+local peg_sounds={"do","re","mi","fa"}
 local state="show" --show|play|countdown - later practice and tutorial
 local round=1 --difficulty, determines chain length and (later) number of buttons
 local lives=3
@@ -73,7 +74,8 @@ local function reset_game(self)
 		msg.post(v, "config", {sprite = sprites[i], order = i, sound = peg_sounds[i]})
 	end	
 	msg.post("/btn-practice", "config", {cursor="/cursor",text="Enter practice"})
-	msg.post("/btn-practice", "deactivate")
+	msg.post("/btn-practice", "disable")
+	msg.post("/btn-practice", "deactivate") -- probably not required
 	prepare_next_round(self)
 end
 
@@ -100,7 +102,6 @@ local function on_countdown_click()
 		msg.post(msg.url("#lbl-counter"), "disable")
 		state="show"
 		print ("state = "..state)
-		msg.post("/btn-practice", "activate")
 	end
 	
 	label.set_text("#lbl-counter",tostring(countdown))
@@ -129,6 +130,8 @@ function update(self, dt)
 		end
 		if #chain_to_show==0 then
 			state="play"
+			msg.post("/btn-practice", "enable")
+			msg.post("/btn-practice", "activate") --probably not required
 			print ("state = "..state)
 			for i, v in ipairs(pegs) do					
 				msg.post(v, "activate")
@@ -151,16 +154,22 @@ end
 
 function on_message(self, message_id, message, sender)
 	if message_id == MSG_BUTTON_TOUCH then
-		if sender.path == "/btn-practice" and (state=="practice" or state=="play") then
+		if sender.path == hash("/btn-practice") and (state=="practice" or state=="play") then
 			local txt
 			if state=="practice" then 
 				state="play" 
 				txt="Enter practice" 
 				print ("state = "..state)
+				reset_game_board_sprite()
+				label.set_text("#lbl-prompt-1", "Replay the sequence")	
+				msg.post(msg.url("#lbl-prompt-2"), "disable")
 			else 
 				state="practice" 
 				txt="Exit practice" 
 				print ("state = "..state)
+				msg.post("#game-board", "play_animation", {id = hash("board-gray")})
+				label.set_text("#lbl-prompt-1", "In practice mode")
+				msg.post(msg.url("#lbl-prompt-2"), "disable")
 			end
 			msg.post("/btn-practice", "config", {text=txt})
 		end		
@@ -168,38 +177,44 @@ function on_message(self, message_id, message, sender)
 	end
 	
 	if message_id==MSG_HIT then
-		print ("receive hit for peg with order = "..message.order)
-		if #chain_to_enter>0 then
-			if chain_to_enter[1]==message.order then
-				--print ("ok so far")
-				msg.post("#game-board", "play_animation", {id = hash("board-green")})
-				go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.5, 1.5, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)
-				--for i=1,#chain_to_enter do print ("before: "..tostring(chain_to_enter[i])) end
-				table.remove(chain_to_enter,1)
-				--for i=1,#chain_to_enter do print ("after: "..tostring(chain_to_enter[i])) end
-				local remaining=""
-				if #chain_to_enter>1 then
-					remaining = tostring(#chain_to_enter).." remaining"
-				elseif #chain_to_enter==1 then
-					remaining = "One to go!"
+		if state=="practice" then
+			msg.post("#game-board", "play_animation", {id = hash("board-gray")})
+			go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.5, 1.5, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)			
+		end
+		if state=="play" then
+			print ("receive hit for peg with order = "..message.order)
+			if #chain_to_enter>0 then
+				if chain_to_enter[1]==message.order then
+					--print ("ok so far")
+					msg.post("#game-board", "play_animation", {id = hash("board-green")})
+					go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.5, 1.5, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)
+					--for i=1,#chain_to_enter do print ("before: "..tostring(chain_to_enter[i])) end
+					table.remove(chain_to_enter,1)
+					--for i=1,#chain_to_enter do print ("after: "..tostring(chain_to_enter[i])) end
+					local remaining=""
+					if #chain_to_enter>1 then
+						remaining = tostring(#chain_to_enter).." remaining"
+					elseif #chain_to_enter==1 then
+						remaining = "One to go!"
+					else
+						remaining = "Well done!"
+					end
+					--print ("setting text to "..remaining)
+					scroll_message(remaining)
+					--go.set_position(vmath.vector3(1200, self.initial_pos.y, self.initial_pos.z), self.label_object)
+					--print ("Remaining pegs: "..tostring(#chain_to_enter))
 				else
-					remaining = "Well done!"
-				end
-				--print ("setting text to "..remaining)
-				scroll_message(remaining)
-				--go.set_position(vmath.vector3(1200, self.initial_pos.y, self.initial_pos.z), self.label_object)
-				--print ("Remaining pegs: "..tostring(#chain_to_enter))
-			else
-				--print ("wrong peg!")
-				msg.post("#game-board", "play_animation", {id = hash("board-red")})
-				go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.5, 1.5, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)
-				lives=lives-1
-				msg.post("/lives#lives", "set_lives", {lives=lives})
-				if lives==0 then
-					game_vars.score=round-1 --to be used by the game over collection
-					print("game over")
-					--back to menu for now, should have proper game over screen, leaderboards etc
-					msg.post("startup:/handler#startup", "show_gameover")
+					--print ("wrong peg!")
+					msg.post("#game-board", "play_animation", {id = hash("board-red")})
+					go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.5, 1.5, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)
+					lives=lives-1
+					msg.post("/lives#lives", "set_lives", {lives=lives})
+					if lives==0 then
+						game_vars.score=round-1 --to be used by the game over collection
+						print("game over")
+						--back to menu for now, should have proper game over screen, leaderboards etc
+						msg.post("startup:/handler#startup", "show_gameover")
+					end
 				end
 			end
 		end

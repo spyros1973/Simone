@@ -51,4 +51,15 @@ images {
 images {
   image: "/assets/button-default.png"
 }
+images {
+  image: "/assets/board-gray.png"
+}
+images {
+  image: "/assets/back-2.png"
+  pivot_x: 0.0
+  pivot_y: 1.0
+}
+images {
+  image: "/assets/title.png"
+}
 extrude_borders: 2
