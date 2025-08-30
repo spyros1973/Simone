@@ -16,6 +16,9 @@ embedded_components {
     x: 288.0
     y: 32.0
   }
+  scale {
+    x: 0.8
+  }
 }
 embedded_components {
   id: "life-2"
@@ -34,6 +37,9 @@ embedded_components {
   position {
     x: 224.0
     y: 32.0
+  }
+  scale {
+    x: 0.8
   }
 }
 embedded_components {
@@ -54,6 +60,9 @@ embedded_components {
     x: 160.0
     y: 32.0
   }
+  scale {
+    x: 0.8
+  }
 }
 embedded_components {
   id: "life-4"
@@ -73,6 +82,9 @@ embedded_components {
     x: 96.0
     y: 32.0
   }
+  scale {
+    x: 0.8
+  }
 }
 embedded_components {
   id: "life-5"
@@ -91,5 +103,8 @@ embedded_components {
   position {
     x: 32.0
     y: 32.0
+  }
+  scale {
+    x: 0.8
   }
 }

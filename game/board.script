@@ -1,10 +1,11 @@
 local game_vars=require("game_vars")
 
 local MSG_HIT = hash("hit")
+local MSG_BUTTON_TOUCH = hash("button_touch")
 
 local pegs={"game-peg0","game-peg1","game-peg2","game-peg3"}
 local peg_sounds={"peg_hit_1","peg_hit_2","peg_hit_3","peg_hit_4"}
-local state="show" --show|play|countdown
+local state="show" --show|play|countdown - later practice and tutorial
 local round=1 --difficulty, determines chain length and (later) number of buttons
 local lives=3
 local chain_to_show={}
@@ -13,6 +14,13 @@ local playback_counter=0
 local countdown=0
 
 --local lbl_prompt = msg.url("#lbl-prompt")
+
+local function scroll_message(txt)
+	label.set_text("scroller#lbl-message",txt)
+	local sp=go.get_position("scroller")
+	go.set_position(vmath.vector3(650,sp.y,sp.z), "scroller")
+	go.animate("scroller", "position.x", go.PLAYBACK_ONCE_FORWARD,-300, go.EASING_INOUTQUAD, 3,0)	
+end
 
 local function get_chain(self)
 	local ret={}
@@ -64,6 +72,8 @@ local function reset_game(self)
 		--print ("setting "..v.." to "..sprites[i])
 		msg.post(v, "config", {sprite = sprites[i], order = i, sound = peg_sounds[i]})
 	end	
+	msg.post("/btn-practice", "config", {cursor="/cursor",text="Enter practice"})
+	msg.post("/btn-practice", "deactivate")
 	prepare_next_round(self)
 end
 
@@ -89,6 +99,8 @@ local function on_countdown_click()
 	if countdown==0 then
 		msg.post(msg.url("#lbl-counter"), "disable")
 		state="show"
+		print ("state = "..state)
+		msg.post("/btn-practice", "activate")
 	end
 	
 	label.set_text("#lbl-counter",tostring(countdown))
@@ -117,6 +129,7 @@ function update(self, dt)
 		end
 		if #chain_to_show==0 then
 			state="play"
+			print ("state = "..state)
 			for i, v in ipairs(pegs) do					
 				msg.post(v, "activate")
 			end	
@@ -126,7 +139,7 @@ function update(self, dt)
 	end
 		
 	
-	if state=="play" then		
+	if state=="play" then
 		if #chain_to_enter==0 then
 			prepare_next_round(self)
 			--print ("current round = "..tostring(round))
@@ -137,6 +150,23 @@ end
 
 
 function on_message(self, message_id, message, sender)
+	if message_id == MSG_BUTTON_TOUCH then
+		if sender.path == "/btn-practice" and (state=="practice" or state=="play") then
+			local txt
+			if state=="practice" then 
+				state="play" 
+				txt="Enter practice" 
+				print ("state = "..state)
+			else 
+				state="practice" 
+				txt="Exit practice" 
+				print ("state = "..state)
+			end
+			msg.post("/btn-practice", "config", {text=txt})
+		end		
+		
+	end
+	
 	if message_id==MSG_HIT then
 		print ("receive hit for peg with order = "..message.order)
 		if #chain_to_enter>0 then
@@ -152,13 +182,11 @@ function on_message(self, message_id, message, sender)
 					remaining = tostring(#chain_to_enter).." remaining"
 				elseif #chain_to_enter==1 then
 					remaining = "One to go!"
+				else
+					remaining = "Well done!"
 				end
 				--print ("setting text to "..remaining)
-				label.set_text("scroller#lbl-message",remaining)
-				local sp=go.get_position("scroller")
-				--go.set("#lbl-msg-scroll", "position", vmath.vector3(650,sp.y,sp.z))
-				go.set_position(vmath.vector3(650,sp.y,sp.z), "scroller")
-				go.animate("scroller", "position.x", go.PLAYBACK_ONCE_FORWARD,-300, go.EASING_INOUTQUAD, 2.5,0)
+				scroll_message(remaining)
 				--go.set_position(vmath.vector3(1200, self.initial_pos.y, self.initial_pos.z), self.label_object)
 				--print ("Remaining pegs: "..tostring(#chain_to_enter))
 			else
@@ -168,7 +196,7 @@ function on_message(self, message_id, message, sender)
 				lives=lives-1
 				msg.post("/lives#lives", "set_lives", {lives=lives})
 				if lives==0 then
-					game_vars.score=round --to be used by the game over collection
+					game_vars.score=round-1 --to be used by the game over collection
 					print("game over")
 					--back to menu for now, should have proper game over screen, leaderboards etc
 					msg.post("startup:/handler#startup", "show_gameover")
