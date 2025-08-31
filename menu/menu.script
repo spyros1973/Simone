@@ -1,6 +1,7 @@
 local common_vars=require("common")
---local high_score=require("highscore")
+local high_score=require("highscore")
 local settings = require("settings")
+
 
 function init(self)
 	print("menu url: "..msg.url())
@@ -9,6 +10,8 @@ function init(self)
 	go.animate("title", "scale", go.PLAYBACK_ONCE_FORWARD, vmath.vector3(0.7, 0.7, 0.7), go.EASING_INCUBIC, 0.6, 0)
 	go.animate("title", "position", go.PLAYBACK_ONCE_FORWARD, vmath.vector3(0, 800, 0), go.EASING_OUTBOUNCE, 0.8, 0)
 	--go.animate("#title", "position", go.PLAYBACK_ONCE_FORWARD, 20, go.EASING_LINEAR, 1)
+	local hi=high_score.load()
+	label.set_text("#lbl-highscore", "High score: "..tostring(hi))
 end
 
 function final(self)

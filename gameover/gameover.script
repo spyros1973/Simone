@@ -1,3 +1,4 @@
+local high_score=require("highscore")
 local game_vars=require("game_vars")
 
 
@@ -6,6 +7,16 @@ function init(self)
 	print ("gameover init called")
 	print ("score is "..game_vars.score)
 	label.set_text("#lbl-score","Your score: "..tostring(game_vars.score))
+	local hi=high_score.load()
+	print ("high score = "..tostring(hi))
+	label.set_text("#lbl-highscore","")
+	if game_vars.score>hi then
+		high_score.save(math.ceil(game_vars.score))
+		label.set_text("#lbl-highscore","A new high score!")
+	elseif game_vars.score==hi then
+		label.set_text("#lbl-highscore","Your score: "..tostring(game_vars.score))
+		label.set_text("#lbl-highscore","Matching the high score!")
+	end		
 	self.timer=0
 end
 

@@ -3,6 +3,7 @@ local MSG_CONFIG = hash("config")
 local MSG_TRIGGER_RESPONSE = hash("trigger_response")
 local MSG_PLAY = hash("play")
 local MSG_ACTIVATE = hash("activate")
+local MSG_DEACTIVATE = hash("deactivate")
 
 local function play_hit_anim(self)
 	go.animate(".","scale.x", go.PLAYBACK_ONCE_PINGPONG, 1.5, go.EASING_INCUBIC, 0.2)

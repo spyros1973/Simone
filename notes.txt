@@ -9,3 +9,4 @@
 (ok) Allow practice mode before game
 Add a more suitable, maybe colored, font (https://defold.com/manuals/font/)
 Maybe add some life win scheme
+(ok) Add high-score feature
