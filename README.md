@@ -37,6 +37,6 @@ Simone has been created using Defold and specifically the "mobile" project templ
 - Accelerometer input is turned off (for better battery life)
 
 # Credits
-Game over sound: Oiboo
-Peg sounds: wobbleboxx.com
-Everything else: spyros1973
+- Game over sound: Oiboo
+- Peg sounds: wobbleboxx.com
+- Everything else: spyros1973
