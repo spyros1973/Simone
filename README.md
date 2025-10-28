@@ -4,6 +4,7 @@ This is a pattern memorization game, inspired by "Simon says", hence the name Si
 
 <img width="416" height="768" alt="Screenshot 2025-10-28 102059" src="https://github.com/user-attachments/assets/f81d82f8-fa08-4073-87a6-d4f7a571ea46" />
 
+#Play
 You can play the game at [my homepage](https://paraschis.gr/filepage.php?key=simone).
 
 # Changelog
