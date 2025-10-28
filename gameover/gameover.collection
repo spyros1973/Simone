@@ -1,4 +1,8 @@
 name: "gameover"
+instances {
+  id: "sound_manager"
+  prototype: "/sound_manager.go"
+}
 scale_along_z: 0
 embedded_instances {
   id: "back"

@@ -18,6 +18,7 @@ function init(self)
 		label.set_text("#lbl-highscore","Matching the high score!")
 	end		
 	self.timer=0
+	msg.post("/sound_manager", "play_sample",{sample="game_over"})
 end
 
 function final(self)

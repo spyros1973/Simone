@@ -10,3 +10,11 @@
 Add a more suitable, maybe colored, font (https://defold.com/manuals/font/)
 (ok) Maybe add some life win scheme
 (ok) Add high-score feature
+
+Better game over screen
+Game over sound
+Online high score feature?
+
+
+Game over sound: Oiboo
+Peg sounds: wobbleboxx.com

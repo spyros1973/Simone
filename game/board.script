@@ -4,8 +4,8 @@ local MSG_HIT = hash("hit")
 local MSG_BUTTON_TOUCH = hash("button_touch")
 
 local pegs={"game-peg0","game-peg1","game-peg2","game-peg3"}
---local peg_sounds={"peg_hit_1","peg_hit_2","peg_hit_3","peg_hit_4"}
-local peg_sounds={"do","re","mi","fa"}
+local peg_sounds={"peg_hit_1","peg_hit_2","peg_hit_3","peg_hit_4"}
+--local peg_sounds={"do","re","mi","fa"}
 local state="show" --show|play|countdown - later practice and tutorial
 local round=1 --difficulty, determines chain length and (later) number of buttons
 local lives=3
@@ -19,9 +19,9 @@ local countdown=0
 
 local function scroll_message(txt)
 	label.set_text("scroller#lbl-message",txt)
-	local sp=go.get_position("scroller")
+	local sp=go.get_position("scroller")	
 	go.set_position(vmath.vector3(650,sp.y,sp.z), "scroller")
-	go.animate("scroller", "position.x", go.PLAYBACK_ONCE_FORWARD,-300, go.EASING_INOUTQUAD, 3,0)	
+	go.animate("scroller", "position.x", go.PLAYBACK_ONCE_FORWARD,-300, go.EASING_OUTEXPO, 4,0)	
 end
 
 local function get_chain(self, initial)
@@ -133,7 +133,7 @@ function update(self, dt)
 			playback_counter=1
 			local scale=16
 			if countdown==4 then scale=8 end
-			go.animate("#lbl-counter", "scale", go.PLAYBACK_ONCE_FORWARD,  vmath.vector3(scale, scale, 1), go.EASING_INOUTQUAD, 1,0,on_countdown_click)
+			go.animate("#lbl-counter", "scale", go.PLAYBACK_ONCE_FORWARD,  vmath.vector3(scale, scale, 1), go.EASING_INOUTQUAD, 0.8,0,on_countdown_click)
 		end	
 	end
 
@@ -227,6 +227,7 @@ function on_message(self, message_id, message, sender)
 					lives=lives-1
 					msg.post("/lives#lives", "set_lives", {lives=lives})
 					msg.post("/sound_manager", "play_sample",{sample="error"})
+					scroll_message("Incorrect!")
 					if lives==0 then
 						game_vars.score=round-1 --to be used by the game over collection
 						print("game over")

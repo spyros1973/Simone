@@ -1,6 +1,7 @@
 [project]
 title = Simone
-version = 1.1
+version = 1.2
+developer = Spyros Paraschis
 
 [bootstrap]
 main_collection = /startup/startup.collectionc
@@ -49,6 +50,7 @@ velocity_threshold = 100.0
 
 [html5]
 scale_mode = downscale_fit
+show_fullscreen_button = 0
 
 [graphics]
 default_texture_min_filter = nearest
