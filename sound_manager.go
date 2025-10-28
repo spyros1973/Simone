@@ -26,6 +26,14 @@ components {
   id: "peg_hit_6"
   component: "/assets/sounds/PowerUp5.wav"
 }
+components {
+  id: "error"
+  component: "/assets/sounds/error.wav"
+}
+components {
+  id: "powerUp"
+  component: "/assets/sounds/powerup.wav"
+}
 embedded_components {
   id: "peg_hit"
   type: "sound"

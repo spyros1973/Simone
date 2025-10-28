@@ -87,6 +87,9 @@ embedded_instances {
   "\"\n"
   "}\n"
   ""
+  position {
+    x: 640.0
+  }
 }
 embedded_instances {
   id: "board"

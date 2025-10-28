@@ -1,0 +1,11 @@
+v1.0
+- Initial version
+
+v1.1
+- Change of peg graphics
+- Introduction of error sound and life win sound
+- On each round, a new sound/move is added to the existing sequence, instead of a whole new sequence.
+- Removal of background
+- Removal of color flash on error
+- Fix of bug where multiple animations ended up messing up the peg size
+- Every 4 levels a life is won

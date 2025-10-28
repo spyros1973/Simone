@@ -62,4 +62,7 @@ images {
 images {
   image: "/assets/title.png"
 }
+images {
+  image: "/assets/sphere.png"
+}
 extrude_borders: 2

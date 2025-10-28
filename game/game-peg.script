@@ -5,9 +5,19 @@ local MSG_PLAY = hash("play")
 local MSG_ACTIVATE = hash("activate")
 local MSG_DEACTIVATE = hash("deactivate")
 
-local function play_hit_anim(self)
-	go.animate(".","scale.x", go.PLAYBACK_ONCE_PINGPONG, 1.5, go.EASING_INCUBIC, 0.2)
-	go.animate(".","scale.y", go.PLAYBACK_ONCE_PINGPONG, 1.5, go.EASING_INCUBIC, 0.2)
+local function play_hit_anim(self)	
+	go.cancel_animations(".", "scale")
+	go.set(".", "scale", vmath.vector3(2, 2, 1))
+	go.animate(".", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.5, 1.5, 1), go.EASING_INCUBIC, 0.2)
+		
+	--[[
+	go.animate(".","scale.x", go.PLAYBACK_ONCE_PINGPONG, 1.5, go.EASING_INCUBIC, 0.2,function()
+		go.set(".", "scale.x", 2)
+	end)
+	go.animate(".","scale.y", go.PLAYBACK_ONCE_PINGPONG, 1.5, go.EASING_INCUBIC, 0.2,function()
+		go.set(".", "scale.y", 2)
+	end)
+	]]--
 end
 
 function init(self)
@@ -29,15 +39,6 @@ function update(self, dt)
 	-- Remove this function if not needed
 end
 
-function fixed_update(self, dt)
-	-- This function is called if 'Fixed Update Frequency' is enabled in the Engine section of game.project
-	-- Can be coupled with fixed updates of the physics simulation if 'Use Fixed Timestep' is enabled in
-	-- Physics section of game.project
-	-- Add update code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
-end
-
 function on_message(self, message_id, message, sender)
 	if message_id==MSG_ACTIVATE then
 		self.active=true
@@ -49,7 +50,9 @@ function on_message(self, message_id, message, sender)
 		
 	if message_id==MSG_CONFIG then
 		self.my_parent=sender
-		msg.post("#sprite", "play_animation", {id = hash(message.sprite)})
+		if message.sprite~=nil then
+			msg.post("#sprite", "play_animation", {id = hash(message.sprite)})
+		end
 		self.order=message.order
 		self.sound=message.sound
 	end

@@ -11,6 +11,7 @@ local round=1 --difficulty, determines chain length and (later) number of button
 local lives=3
 local chain_to_show={}
 local chain_to_enter={}
+local initial_chain={}
 local playback_counter=0
 local countdown=0
 
@@ -23,16 +24,21 @@ local function scroll_message(txt)
 	go.animate("scroller", "position.x", go.PLAYBACK_ONCE_FORWARD,-300, go.EASING_INOUTQUAD, 3,0)	
 end
 
-local function get_chain(self)
-	local ret={}
+local function get_chain(self, initial)
+	local ret=initial
 	local pegs_count=#pegs	
-	for i = 1, 2+round, 1 do
-		--print ("adding "..tostring(i))
+	if #ret==0 then
+		for i = 1, 2+round, 1 do
+			--print ("adding "..tostring(i))
+			local n=math.random(pegs_count)
+			table.insert(ret,n)
+		end
+	else
 		table.insert(ret,math.random(pegs_count))
 	end
-	for i = 1, #ret do
+	--for i = 1, #ret do
 		--print (ret[i])
-	end
+	--end
 	return ret
 end
 
@@ -40,17 +46,27 @@ local function prepare_next_round(self)
 	state="countdown"
 	countdown=4
 	round = round + 1
+
+	if round % 5 == 0 and lives<5 then
+		lives=lives+1
+		msg.post("/lives#lives", "set_lives", {lives=lives})
+		msg.post("/sound_manager", "play_sample",{sample="powerup"})
+	end
+
+	
 	label.set_text("#lbl-round", "Round: "..tostring(round))
 	--go.set("#lbl-counter", "outline.w", 4)
 	--go.set("#lbl-counter", "outline", vmath.vector4(8, 0, 0, 0))
 	go.set("#lbl-counter", "outline", vmath.vector4(4, 0, 0, 0))
 	go.set("#lbl-counter", "shadow", vmath.vector4(0, 0, 1, 1)) -- Blue outline
-	chain_to_show=get_chain(self)
+	chain_to_show=get_chain(self,initial_chain)
 	--for i=1,#chain_to_show do print ("toshow: "..tostring(chain_to_show[i])) end				
 	
 	chain_to_enter={}
+	initial_chain={}
 	for i=1,#chain_to_show do
 		table.insert(chain_to_enter,chain_to_show[i])
+		table.insert(initial_chain,chain_to_show[i])
 	end
 	--for i=1,#chain_to_enter do print ("initial: "..tostring(chain_to_enter[i])) end				
 	
@@ -71,7 +87,8 @@ local function reset_game(self)
 	
 	for i, v in ipairs(pegs) do		
 		--print ("setting "..v.." to "..sprites[i])
-		msg.post(v, "config", {sprite = sprites[i], order = i, sound = peg_sounds[i]})
+		--msg.post(v, "config", {sprite = sprites[i], order = i, sound = peg_sounds[i]})
+		msg.post(v, "config", {order = i, sound = peg_sounds[i]})
 	end	
 	msg.post("/btn-practice", "config", {cursor="/cursor",text="Enter practice"})
 	msg.post("/btn-practice", "disable")
@@ -187,7 +204,7 @@ function on_message(self, message_id, message, sender)
 				if chain_to_enter[1]==message.order then
 					--print ("ok so far")
 					msg.post("#game-board", "play_animation", {id = hash("board-green")})
-					go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.5, 1.5, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)
+					go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.7, 1.7, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)
 					--for i=1,#chain_to_enter do print ("before: "..tostring(chain_to_enter[i])) end
 					table.remove(chain_to_enter,1)
 					--for i=1,#chain_to_enter do print ("after: "..tostring(chain_to_enter[i])) end
@@ -205,10 +222,11 @@ function on_message(self, message_id, message, sender)
 					--print ("Remaining pegs: "..tostring(#chain_to_enter))
 				else
 					--print ("wrong peg!")
-					msg.post("#game-board", "play_animation", {id = hash("board-red")})
-					go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.5, 1.5, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)
+					--msg.post("#game-board", "play_animation", {id = hash("board-red")})
+					go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.7, 1.7, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)
 					lives=lives-1
 					msg.post("/lives#lives", "set_lives", {lives=lives})
+					msg.post("/sound_manager", "play_sample",{sample="error"})
 					if lives==0 then
 						game_vars.score=round-1 --to be used by the game over collection
 						print("game over")
