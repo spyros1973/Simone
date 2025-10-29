@@ -25,6 +25,11 @@ v1.2
 - A game over sound
 - Animation tweaks
 
+v1.3
+- Introduction of main menu
+- Peg sounds can be selected
+- Fix for wrong hit test with the new graphics
+
 # About
 Simone has been created using Defold and specifically the "mobile" project template. This means that the settings in ["game.project"](defold://open?path=/game.project) have been changed to be suitable for a mobile game:
 
@@ -39,4 +44,5 @@ Simone has been created using Defold and specifically the "mobile" project templ
 # Credits
 - Game over sound: Oiboo
 - Peg sounds: wobbleboxx.com
+
 - Everything else: spyros1973

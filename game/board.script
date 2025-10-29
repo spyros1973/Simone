@@ -114,7 +114,7 @@ function init(self)
 	--print ("label url is "..msg.url("#lbl-prompt-1"))
 	msg.post(msg.url("#lbl-prompt-1"), "enable")
 	msg.post(msg.url("#lbl-prompt-2"), "enable")
-	sprite.set_constant("/back#sprite", "tint", vmath.vector4(1,1,1,.2))
+	sprite.set_constant("/back#sprite", "tint", vmath.vector4(1,1,1,.4))
 	--msg.post("#game-board", "disable")
 	reset_game(self)
 end

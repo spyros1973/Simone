@@ -33,8 +33,6 @@ images {
 }
 images {
   image: "/assets/back-2.png"
-  pivot_x: 0.0
-  pivot_y: 1.0
 }
 images {
   image: "/assets/title.png"
