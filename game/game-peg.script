@@ -7,24 +7,20 @@ local MSG_DEACTIVATE = hash("deactivate")
 
 local function play_hit_anim(self)	
 	go.cancel_animations(".", "scale")
+	print (self.tint)
+	sprite.set_constant("#overlay", "tint", self.tint)
 	go.set(".", "scale", vmath.vector3(2, 2, 1))
-	go.animate(".", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.5, 1.5, 1), go.EASING_INCUBIC, 0.2)
-		
-	--[[
-	go.animate(".","scale.x", go.PLAYBACK_ONCE_PINGPONG, 1.5, go.EASING_INCUBIC, 0.2,function()
-		go.set(".", "scale.x", 2)
-	end)
-	go.animate(".","scale.y", go.PLAYBACK_ONCE_PINGPONG, 1.5, go.EASING_INCUBIC, 0.2,function()
-		go.set(".", "scale.y", 2)
-	end)
-	]]--
+	go.animate(".", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.5, 1.5, 1), go.EASING_INCUBIC, 0.2,0, function()
+		sprite.set_constant("#overlay", "tint", vmath.vector4(1, 1, 1, 0))
+	end)		
 end
 
 function init(self)
 	msg.post(".", "acquire_input_focus")
 	self.mouse_pressed=false
 	self.my_parent=nil
-	self.active=false		
+	self.active=false	
+	sprite.set_constant("#overlay", "tint", vmath.vector4(1, 1, 1, 0.0))
 end
 
 function final(self)
@@ -55,6 +51,7 @@ function on_message(self, message_id, message, sender)
 		end
 		self.order=message.order
 		self.sound=message.sound
+		self.tint=message.tint
 	end
 
 	if message_id==MSG_PLAY then

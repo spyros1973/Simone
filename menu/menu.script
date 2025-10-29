@@ -21,7 +21,7 @@ end
 function on_input(self, action_id, action)
 	if action_id == hash("escape") and action.released then
 		--msg.post("/sound_manager", "play_sample",{sample="button"})
-		msg.post("@system:", "exit", {code = 0})
+		--msg.post("@system:", "exit", {code = 0})
 	end
 		
 	if action_id == hash("touch") then

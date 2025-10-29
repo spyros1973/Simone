@@ -65,4 +65,7 @@ images {
 images {
   image: "/assets/sphere.png"
 }
+images {
+  image: "/assets/peg_mask.png"
+}
 extrude_borders: 2
