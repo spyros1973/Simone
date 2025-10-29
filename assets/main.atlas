@@ -2,29 +2,6 @@ images {
   image: "/assets/app_icons/icon_180.png"
 }
 images {
-  image: "/assets/Match3Clover.png"
-}
-images {
-  image: "/assets/Match3Heart.png"
-}
-images {
-  image: "/assets/Match3Moon.png"
-}
-images {
-  image: "/assets/Match3Star.png"
-}
-images {
-  image: "/assets/Match3Water.png"
-}
-images {
-  image: "/assets/back-1.png"
-  pivot_x: 0.0
-  pivot_y: 1.0
-}
-images {
-  image: "/assets/Heart1.png"
-}
-images {
   image: "/assets/board.png"
 }
 images {
@@ -67,5 +44,29 @@ images {
 }
 images {
   image: "/assets/peg_mask.png"
+}
+images {
+  image: "/assets/Play.png"
+}
+images {
+  image: "/assets/Blue.png"
+}
+images {
+  image: "/assets/pause.png"
+}
+images {
+  image: "/assets/Settings.png"
+}
+images {
+  image: "/assets/64x64_yellow.png"
+}
+images {
+  image: "/assets/panel.png"
+}
+images {
+  image: "/assets/tile.png"
+}
+images {
+  image: "/assets/Heart1.png"
 }
 extrude_borders: 2

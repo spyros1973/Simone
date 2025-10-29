@@ -8,22 +8,6 @@ embedded_instances {
   "  component: \"/menu/menu.script\"\n"
   "}\n"
   "embedded_components {\n"
-  "  id: \"label\"\n"
-  "  type: \"label\"\n"
-  "  data: \"size {\\n"
-  "  x: 128.0\\n"
-  "  y: 32.0\\n"
-  "}\\n"
-  "text: \\\"Press a key to start\\\"\\n"
-  "font: \\\"/builtins/fonts/default.font\\\"\\n"
-  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
-  "\"\n"
-  "  scale {\n"
-  "    x: 2.0\n"
-  "    y: 2.0\n"
-  "  }\n"
-  "}\n"
-  "embedded_components {\n"
   "  id: \"lbl-highscore\"\n"
   "  type: \"label\"\n"
   "  data: \"size {\\n"
@@ -34,7 +18,7 @@ embedded_instances {
   "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
   "\"\n"
   "  position {\n"
-  "    y: 500.0\n"
+  "    y: 613.0\n"
   "  }\n"
   "  scale {\n"
   "    x: 2.0\n"
@@ -44,7 +28,7 @@ embedded_instances {
   "}\n"
   ""
   position {
-    x: 322.0
+    x: 320.0
     y: 95.0
   }
 }
@@ -62,6 +46,9 @@ embedded_instances {
   "\"\n"
   "}\n"
   ""
+  position {
+    z: -0.1
+  }
 }
 embedded_instances {
   id: "title"
@@ -80,4 +67,12 @@ embedded_instances {
   position {
     y: 1200.0
   }
+}
+embedded_instances {
+  id: "gui"
+  data: "components {\n"
+  "  id: \"menu\"\n"
+  "  component: \"/menu/menu.gui\"\n"
+  "}\n"
+  ""
 }

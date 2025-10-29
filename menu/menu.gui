@@ -1,0 +1,168 @@
+script: "/menu/menu.gui_script"
+fonts {
+  name: "default"
+  font: "/builtins/fonts/default.font"
+}
+textures {
+  name: "main"
+  texture: "/assets/main.atlas"
+}
+nodes {
+  position {
+    x: 320.0
+    y: 403.0
+  }
+  size {
+    x: 164.0
+    y: 164.0
+  }
+  type: TYPE_BOX
+  texture: "main/sphere"
+  id: "playButton"
+  inherit_alpha: true
+}
+nodes {
+  size {
+    x: 64.0
+    y: 64.0
+  }
+  type: TYPE_BOX
+  texture: "main/Play"
+  id: "playButtonIcon"
+  parent: "playButton"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 320.0
+    y: 175.0
+  }
+  size {
+    x: 164.0
+    y: 164.0
+  }
+  type: TYPE_BOX
+  texture: "main/sphere"
+  id: "settingsButton"
+  inherit_alpha: true
+}
+nodes {
+  size {
+    x: 64.0
+    y: 64.0
+  }
+  type: TYPE_BOX
+  texture: "main/Settings"
+  id: "settingsButtonIcon"
+  parent: "settingsButton"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 908.0
+    y: 169.0
+  }
+  size {
+    x: 480.0
+    y: 240.0
+  }
+  type: TYPE_BOX
+  texture: "main/panel"
+  id: "panelSound"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: -120.0
+  }
+  size {
+    x: 144.0
+    y: 68.0
+  }
+  type: TYPE_BOX
+  texture: "main/tile"
+  id: "btnFx"
+  parent: "panelSound"
+  inherit_alpha: true
+  slice9 {
+    x: 4.0
+    y: 4.0
+    z: 4.0
+    w: 4.0
+  }
+}
+nodes {
+  scale {
+    x: 2.0
+    y: 2.0
+  }
+  size {
+    x: 64.0
+    y: 64.0
+  }
+  type: TYPE_TEXT
+  text: "fx\n"
+  ""
+  font: "default"
+  id: "text"
+  parent: "btnFx"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 120.0
+  }
+  size {
+    x: 144.0
+    y: 68.0
+  }
+  type: TYPE_BOX
+  texture: "main/tile"
+  id: "btnNotes"
+  parent: "panelSound"
+  inherit_alpha: true
+  slice9 {
+    x: 4.0
+    y: 4.0
+    z: 4.0
+    w: 4.0
+  }
+}
+nodes {
+  scale {
+    x: 2.0
+    y: 2.0
+  }
+  size {
+    x: 64.0
+    y: 64.0
+  }
+  type: TYPE_TEXT
+  text: "do-re-mi"
+  font: "default"
+  id: "text1"
+  parent: "btnNotes"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 215.0
+    y: 98.0
+  }
+  scale {
+    x: 2.0
+    y: 1.5
+  }
+  size {
+    x: 24.0
+    y: 24.0
+  }
+  type: TYPE_TEXT
+  text: "X"
+  font: "default"
+  id: "btnClose"
+  parent: "panelSound"
+  inherit_alpha: true
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

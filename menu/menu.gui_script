@@ -1,0 +1,106 @@
+local settings=require("settings")
+
+local playButton,settingsButton,soundPanel,notesButton,fxButton,closeButton
+local soundPanelVisible=false
+
+local function hide_sound_panel() 
+	gui.animate(soundPanel, "position.x", 900, gui.EASING_OUTSINE, 0.5, 0, function()
+		soundPanelVisible=false
+	end)	
+end
+
+local function set_sound_buttons()
+	if settings.sound_theme=="notes" then
+		gui.set(notesButton, "scale", vmath.vector3(1.2))
+		gui.set(fxButton, "scale", vmath.vector3(1))
+	else
+		gui.set(notesButton, "scale", vmath.vector3(1))
+		gui.set(fxButton, "scale", vmath.vector3(1.2))
+	end	
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	playButton = gui.get_node("playButton")
+	settingsButton = gui.get_node("settingsButton")
+	soundPanel = gui.get_node("panelSound")
+	notesButton = gui.get_node("btnNotes")
+	fxButton = gui.get_node("btnFx")
+	closeButton = gui.get_node("btnClose")
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	-- Add update code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function on_message(self, message_id, message, sender)
+	-- Add message-handling code here
+	-- Learn more: https://defold.com/manuals/message-passing/
+	-- Remove this function if not needed
+end
+
+function on_input(self, action_id, action)	
+	if action_id == hash("escape") and action.released and soundPanelVisible then
+		hide_sound_panel()
+	end
+	if action.released and action_id == hash("touch") then		
+		if gui.pick_node(playButton, action.x, action.y) then
+			gui.animate(playButton, "scale", 1.5, gui.EASING_OUTSINE, 0.2, 0, function(self,node)
+				msg.post("startup:/handler#startup", "show_game")
+			end, gui.PLAYBACK_ONCE_PINGPONG)
+		end
+
+		if gui.pick_node(settingsButton, action.x, action.y) then
+			if not soundPanelVisible then
+				gui.animate(settingsButton, "scale", 1.5, gui.EASING_OUTSINE, 0.2, 0, function(self,node)
+					--if soundPanelVisible then
+					--	gui.animate(soundPanel, "position.x", 900, gui.EASING_OUTSINE, 0.5, 0, function()
+					--		soundPanelVisible=false
+					--	end)
+					--else
+					set_sound_buttons()
+					gui.animate(soundPanel, "position.x", 320, gui.EASING_OUTSINE, 0.5, 0, function()
+							soundPanelVisible=true
+						end)
+					--end
+				end, gui.PLAYBACK_ONCE_PINGPONG)		
+			end
+		end
+		if soundPanelVisible then
+			if gui.pick_node(closeButton, action.x, action.y) then				
+				hide_sound_panel()
+				return
+			end
+			if gui.pick_node(notesButton, action.x, action.y) then
+				settings.sound_theme="notes"
+				set_sound_buttons()
+				--hide_sound_panel()
+				settings.save()
+			end
+			if gui.pick_node(fxButton, action.x, action.y) then
+				settings.sound_theme="fx"
+				set_sound_buttons()
+				--hide_sound_panel()
+				settings.save()
+			end
+			
+		end
+		
+		
+	end
+	
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end
