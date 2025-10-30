@@ -1,0 +1,61 @@
+local common=require("common")
+
+go.property("mode", hash("hide"))
+
+local MSG_SETMODE = hash("setmode")
+local MSG_START = hash("start")
+
+local max_size= vmath.vector3(5,5,1)
+
+function init(self)	
+	print("overlay url: "..msg.url())
+	go.set(".","position.x",-common.screen_width)
+	go.set(".","position.y",common.screen_height/2)
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	-- Add update code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function fixed_update(self, dt)
+	-- This function is called if 'Fixed Update Frequency' is enabled in the Engine section of game.project
+	-- Can be coupled with fixed updates of the physics simulation if 'Use Fixed Timestep' is enabled in
+	-- Physics section of game.project
+	-- Add update code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id==MSG_SETMODE then
+		--print("blah: " .. (a and "blah" or "nahblah"))
+		go.set(".", "scale", (self.mode==hash("hide") and vmath.vector3(0,0,0) or max_size))		
+	end
+
+	if message_id==MSG_START then
+		local target=(self.mode==hash("show") and vmath.vector3(0,0,0) or max_size)
+		go.set(".","position.x",common.screen_width/2)	
+		print ("animating to "..tostring(target).." in mode "..self.mode)
+		print ("position is "..tostring(go.get(".","position")))
+		
+		go.animate(".", "scale", go.PLAYBACK_ONCE_FORWARD, target, go.EASING_LINEAR, 0.8, 0, function()			
+			msg.post(sender,message.callback,message.options)
+			go.set(".","position.x",-common.screen_width/2)	
+			go.set(".", "scale", (self.mode==hash("hide") and vmath.vector3(0,0,0) or max_size))
+		end)
+	end	
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end

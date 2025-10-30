@@ -4,11 +4,9 @@ local game_vars=require("game_vars")
 
 function init(self)
 	msg.post(".", "acquire_input_focus")
-	print ("gameover init called")
-	print ("score is "..game_vars.score)
+	sprite.set_constant("/back#sprite", "tint", vmath.vector4(1,1,1,.4))
 	label.set_text("#lbl-score","Your score: "..tostring(game_vars.score))
 	local hi=high_score.load()
-	print ("high score = "..tostring(hi))
 	label.set_text("#lbl-highscore","")
 	if game_vars.score>hi then
 		high_score.save(math.ceil(game_vars.score))

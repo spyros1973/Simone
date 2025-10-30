@@ -1,8 +1,11 @@
 local game_vars=require("game_vars")
 local settings=require("settings")
 
+local restart_on_error=true
+
 local MSG_HIT = hash("hit")
 local MSG_BUTTON_TOUCH = hash("button_touch")
+local MSG_LIFE_LOST = hash("lifelost")
 
 local pegs={"game-peg0","game-peg1","game-peg2","game-peg3"}
 local peg_sounds={}
@@ -16,13 +19,11 @@ local initial_chain={}
 local playback_counter=0
 local countdown=0
 
---local lbl_prompt = msg.url("#lbl-prompt")
-
 local function scroll_message(txt)
 	label.set_text("scroller#lbl-message",txt)
 	local sp=go.get_position("scroller")	
 	go.set_position(vmath.vector3(650,sp.y,sp.z), "scroller")
-	go.animate("scroller", "position.x", go.PLAYBACK_ONCE_FORWARD,-300, go.EASING_OUTEXPO, 4.5,0)	
+	go.animate("scroller", "position.x", go.PLAYBACK_ONCE_FORWARD,-300, go.EASING_LINEAR, 4,0)	
 end
 
 local function get_chain(self, initial)
@@ -30,7 +31,6 @@ local function get_chain(self, initial)
 	local pegs_count=#pegs	
 	if #ret==0 then
 		for i = 1, 2+round, 1 do
-			--print ("adding "..tostring(i))
 			local n=math.random(pegs_count)
 			table.insert(ret,n)
 		end
@@ -80,10 +80,28 @@ local function prepare_next_round(self)
 	go.set("#lbl-counter", "scale.y", 1)
 end
 
+local function restart_level(self)
+	state="countdown"
+	countdown=4
+
+	chain_to_enter={}
+	chain_to_show={}
+	for i=1,#initial_chain do
+		table.insert(chain_to_enter,initial_chain[i])
+		table.insert(chain_to_show,initial_chain[i])
+	end
+	label.set_text("#lbl-prompt-1", "Memorize the sequence")
+	msg.post(msg.url("#lbl-prompt-2"), "enable")
+	label.set_text("#lbl-prompt-2", tostring(#chain_to_enter).." moves to memorize")
+	label.set_text("#lbl-counter","Round "..tostring(round))
+	msg.post(msg.url("#lbl-counter"), "enable")
+	go.set("#lbl-counter", "scale.x", 1)
+	go.set("#lbl-counter", "scale.y", 1)	
+end
+
 local function reset_game(self) 
 	round=0	
 	msg.post("/lives#lives", "set_lives", {lives=lives})
-	--local sprites={"Match3Clover","Match3Heart","Match3Moon","Match3Star"}
 	local sprites={"peg-red","peg-green","peg-blue","peg-yellow"}
 	local colors={vmath.vector4(1, 0, 0, .4),vmath.vector4(0, 1, 0, .4),vmath.vector4(0, 0, 1, .4),vmath.vector4(1, 1, 0, .4)}
 
@@ -99,6 +117,9 @@ local function reset_game(self)
 		
 		msg.post(v, "config", {order = i, sound = peg_sounds[i], tint=colors[i]})
 	end	
+	msg.post("/btn-abort", "config", {cursor="/cursor",text="Abort"})
+	msg.post("/btn-abort", "disable")
+	msg.post("/btn-abort", "deactivate") -- probably not required
 	msg.post("/btn-practice", "config", {cursor="/cursor",text="Enter practice"})
 	msg.post("/btn-practice", "disable")
 	msg.post("/btn-practice", "deactivate") -- probably not required
@@ -144,7 +165,7 @@ function update(self, dt)
 			playback_counter=1
 			local scale=16
 			if countdown==4 then scale=8 end
-			go.animate("#lbl-counter", "scale", go.PLAYBACK_ONCE_FORWARD,  vmath.vector3(scale, scale, 1), go.EASING_INOUTQUAD, 0.8,0,on_countdown_click)
+			go.animate("#lbl-counter", "scale", go.PLAYBACK_ONCE_FORWARD,  vmath.vector3(scale, scale, 1), go.EASING_INOUTQUAD, 0.6,0,on_countdown_click)
 		end	
 	end
 
@@ -158,6 +179,8 @@ function update(self, dt)
 		end
 		if #chain_to_show==0 then
 			state="play"
+			msg.post("/btn-abort", "enable")
+			msg.post("/btn-abort", "activate") 
 			msg.post("/btn-practice", "enable")
 			msg.post("/btn-practice", "activate") --probably not required
 			print ("state = "..state)
@@ -201,7 +224,9 @@ function on_message(self, message_id, message, sender)
 			end
 			msg.post("/btn-practice", "config", {text=txt})
 		end		
-		
+		if sender.path == hash("/btn-abort") and (state=="practice" or state=="play") then
+			msg.post("startup:/handler#startup", "show_menu") --needs confirmation
+		end
 	end
 	
 	if message_id==MSG_HIT then
@@ -234,22 +259,37 @@ function on_message(self, message_id, message, sender)
 					--go.set_position(vmath.vector3(1200, self.initial_pos.y, self.initial_pos.z), self.label_object)
 					--print ("Remaining pegs: "..tostring(#chain_to_enter))
 				else
-					--print ("wrong peg!")
-					--msg.post("#game-board", "play_animation", {id = hash("board-red")})
-					go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.7, 1.7, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)
 					lives=lives-1
 					msg.post("/lives#lives", "set_lives", {lives=lives})
 					msg.post("/sound_manager", "play_sample",{sample="error"})
 					scroll_message("Incorrect!")
-					if lives==0 then
-						game_vars.score=round-1 --to be used by the game over collection
-						print("game over")
-						--back to menu for now, should have proper game over screen, leaderboards etc
-						msg.post("startup:/handler#startup", "show_gameover")
+					if restart_on_error then
+						go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.7, 1.7, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)						
+						msg.post("/screen-overlay","setmode",{mode="hide"})
+						msg.post("/screen-overlay","start",{callback="lifelost"})
+					else
+						if lives==0 then
+							game_vars.score=round-1 --to be used by the game over collection
+							print("game over")
+							msg.post("startup:/handler#startup", "show_gameover")
+						end						
 					end
 				end
 			end
 		end
+	end
+
+	if message_id==MSG_LIFE_LOST then --from overlay		
+		if lives==0 then
+			game_vars.score=round-1 --to be used by the game over collection
+			print("game over")
+			--back to menu for now, should have proper game over screen, leaderboards etc
+			msg.post("startup:/handler#startup", "show_gameover")
+		else
+			scroll_message("Level restart!")
+			restart_level(self)
+		end		
+		
 	end
 	--print("message "..hash(message_id).." received on "..tostring(self))
 end

@@ -18,6 +18,7 @@ embedded_components {
   }
   scale {
     x: 0.8
+    y: 0.8
   }
 }
 embedded_components {
@@ -40,6 +41,7 @@ embedded_components {
   }
   scale {
     x: 0.8
+    y: 0.8
   }
 }
 embedded_components {
@@ -62,6 +64,7 @@ embedded_components {
   }
   scale {
     x: 0.8
+    y: 0.8
   }
 }
 embedded_components {
@@ -84,6 +87,7 @@ embedded_components {
   }
   scale {
     x: 0.8
+    y: 0.8
   }
 }
 embedded_components {
@@ -106,5 +110,6 @@ embedded_components {
   }
   scale {
     x: 0.8
+    y: 0.8
   }
 }

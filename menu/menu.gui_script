@@ -54,7 +54,8 @@ function on_input(self, action_id, action)
 	if action.released and action_id == hash("touch") then		
 		if gui.pick_node(playButton, action.x, action.y) then
 			gui.animate(playButton, "scale", 1.5, gui.EASING_OUTSINE, 0.2, 0, function(self,node)
-				msg.post("startup:/handler#startup", "show_game")
+				--msg.post("startup:/handler#startup", "show_game")
+				msg.post("handler#menu","play")
 			end, gui.PLAYBACK_ONCE_PINGPONG)
 		end
 
@@ -91,12 +92,8 @@ function on_input(self, action_id, action)
 				--hide_sound_panel()
 				settings.save()
 			end
-			
 		end
-		
-		
-	end
-	
+	end	
 end
 
 function on_reload(self)

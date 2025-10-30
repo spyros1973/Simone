@@ -1,13 +1,14 @@
 local common_vars=require("common")
 local high_score=require("highscore")
 local settings = require("settings")
-
+--local overlay = factory.create("overlay_factory")
 
 function init(self)
 	print("menu url: "..msg.url())
 	msg.post(".", "acquire_input_focus")
-	sprite.set_constant("/back#sprite", "tint", vmath.vector4(1,1,1,.2))
+	sprite.set_constant("/back#sprite", "tint", vmath.vector4(1,1,1,.4))
 	settings.load()
+	msg.post("/gui","enable")
 	go.animate("title", "scale", go.PLAYBACK_ONCE_FORWARD, vmath.vector3(0.7, 0.7, 0.7), go.EASING_INCUBIC, 0.6, 0)
 	go.animate("title", "position", go.PLAYBACK_ONCE_FORWARD, vmath.vector3(0, 800, 0), go.EASING_OUTBOUNCE, 0.8, 0)
 	--go.animate("#title", "position", go.PLAYBACK_ONCE_FORWARD, 20, go.EASING_LINEAR, 1)
@@ -17,6 +18,18 @@ end
 
 function final(self)
 	msg.post(".", "release_input_focus")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id==hash("play") then
+		msg.post("/screen-overlay","setmode",{mode="hide"})		
+		msg.post("/screen-overlay","start",{callback="gotoplay"})
+		msg.post("/gui","disable")
+	end
+
+	if message_id==hash("gotoplay") then
+		msg.post("startup:/handler#startup", "show_game")
+	end
 end
 
 function on_input(self, action_id, action)

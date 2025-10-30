@@ -10,11 +10,15 @@
 Add a more suitable, maybe colored, font (https://defold.com/manuals/font/)
 (ok) Maybe add some life win scheme
 (ok) Add high-score feature
+(ok) Add main menu with settings for sounds
+(ok) Show some credits
+(ok) Game over sound
+(ok) On mistakes, the level is restarted
 
+(~ok) Pause/Exit button for touch control
 Better game over screen
-Game over sound
 Online high score feature?
-
+(ok) Messages should be more visible
 
 Game over sound: Oiboo
 Peg sounds: wobbleboxx.com
