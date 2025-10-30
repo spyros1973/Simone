@@ -41,7 +41,7 @@ embedded_components {
   "    count: 1\n"
   "    id: \"sphere\"\n"
   "  }\n"
-  "  data: 46.49635\n"
+  "  data: 45.0\n"
   "}\n"
   ""
 }

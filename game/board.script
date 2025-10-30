@@ -18,6 +18,7 @@ local chain_to_enter={}
 local initial_chain={}
 local playback_counter=0
 local countdown=0
+local input_active=true
 
 local function scroll_message(txt)
 	label.set_text("scroller#lbl-message",txt)
@@ -204,81 +205,84 @@ end
 
 
 function on_message(self, message_id, message, sender)
-	if message_id == MSG_BUTTON_TOUCH then
-		if sender.path == hash("/btn-practice") and (state=="practice" or state=="play") then
-			local txt
-			if state=="practice" then 
-				state="play" 
-				txt="Enter practice" 
-				print ("state = "..state)
-				reset_game_board_sprite()
-				label.set_text("#lbl-prompt-1", "Replay the sequence")	
-				msg.post(msg.url("#lbl-prompt-2"), "disable")
-			else 
-				state="practice" 
-				txt="Exit practice" 
-				print ("state = "..state)
-				msg.post("#game-board", "play_animation", {id = hash("board-gray")})
-				label.set_text("#lbl-prompt-1", "In practice mode")
-				msg.post(msg.url("#lbl-prompt-2"), "disable")
-			end
-			msg.post("/btn-practice", "config", {text=txt})
-		end		
-		if sender.path == hash("/btn-abort") and (state=="practice" or state=="play") then
-			msg.post("startup:/handler#startup", "show_menu") --needs confirmation
-		end
-	end
-	
-	if message_id==MSG_HIT then
-		if state=="practice" then
-			msg.post("#game-board", "play_animation", {id = hash("board-gray")})
-			go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.5, 1.5, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)			
-		end
-		if state=="play" then
-			print ("receive hit for peg with order = "..message.order)
-			if #chain_to_enter>0 then
-				go.cancel_animations("#game-board", "scale")
-				if chain_to_enter[1]==message.order then
-					--print ("ok so far")
-					--msg.post("#game-board", "play_animation", {id = hash("board-green")})
+	if input_active then 
+		if message_id == MSG_BUTTON_TOUCH then
+			if sender.path == hash("/btn-practice") and (state=="practice" or state=="play") then
+				local txt
+				if state=="practice" then 
+					state="play" 
+					txt="Enter practice" 
+					print ("state = "..state)
+					reset_game_board_sprite()
+					label.set_text("#lbl-prompt-1", "Replay the sequence")	
+					msg.post(msg.url("#lbl-prompt-2"), "disable")
+				else 
+					state="practice" 
+					txt="Exit practice" 
+					print ("state = "..state)
 					msg.post("#game-board", "play_animation", {id = hash("board-gray")})
-					go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.7, 1.7, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)
-					--for i=1,#chain_to_enter do print ("before: "..tostring(chain_to_enter[i])) end
-					table.remove(chain_to_enter,1)
-					--for i=1,#chain_to_enter do print ("after: "..tostring(chain_to_enter[i])) end
-					local remaining=""
-					if #chain_to_enter>1 then
-						remaining = tostring(#chain_to_enter).." remaining"
-					elseif #chain_to_enter==1 then
-						remaining = "One to go!"
+					label.set_text("#lbl-prompt-1", "In practice mode")
+					msg.post(msg.url("#lbl-prompt-2"), "disable")
+				end
+				msg.post("/btn-practice", "config", {text=txt})
+			end		
+			if sender.path == hash("/btn-abort") and (state=="practice" or state=="play") then
+				msg.post("startup:/handler#startup", "show_menu") --needs confirmation
+			end
+		end
+		
+		if message_id==MSG_HIT then
+			if state=="practice" then
+				msg.post("#game-board", "play_animation", {id = hash("board-gray")})
+				go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.5, 1.5, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)			
+			end
+			if state=="play" then
+				print ("receive hit for peg with order = "..message.order)
+				if #chain_to_enter>0 then
+					go.cancel_animations("#game-board", "scale")
+					if chain_to_enter[1]==message.order then
+						--print ("ok so far")
+						--msg.post("#game-board", "play_animation", {id = hash("board-green")})
+						msg.post("#game-board", "play_animation", {id = hash("board-gray")})
+						go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.7, 1.7, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)
+						--for i=1,#chain_to_enter do print ("before: "..tostring(chain_to_enter[i])) end
+						table.remove(chain_to_enter,1)
+						--for i=1,#chain_to_enter do print ("after: "..tostring(chain_to_enter[i])) end
+						local remaining=""
+						if #chain_to_enter>1 then
+							remaining = tostring(#chain_to_enter).." remaining"
+						elseif #chain_to_enter==1 then
+							remaining = "One to go!"
+						else
+							remaining = "Well done!"
+						end
+						--print ("setting text to "..remaining)
+						scroll_message(remaining)
+						--go.set_position(vmath.vector3(1200, self.initial_pos.y, self.initial_pos.z), self.label_object)
+						--print ("Remaining pegs: "..tostring(#chain_to_enter))
 					else
-						remaining = "Well done!"
-					end
-					--print ("setting text to "..remaining)
-					scroll_message(remaining)
-					--go.set_position(vmath.vector3(1200, self.initial_pos.y, self.initial_pos.z), self.label_object)
-					--print ("Remaining pegs: "..tostring(#chain_to_enter))
-				else
-					lives=lives-1
-					msg.post("/lives#lives", "set_lives", {lives=lives})
-					msg.post("/sound_manager", "play_sample",{sample="error"})
-					scroll_message("Incorrect!")
-					if restart_on_error then
-						go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.7, 1.7, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)						
-						msg.post("/screen-overlay","setmode",{mode="hide"})
-						msg.post("/screen-overlay","start",{callback="lifelost"})
-					else
-						if lives==0 then
-							game_vars.score=round-1 --to be used by the game over collection
-							print("game over")
-							msg.post("startup:/handler#startup", "show_gameover")
-						end						
+						lives=lives-1
+						msg.post("/lives#lives", "set_lives", {lives=lives})
+						msg.post("/sound_manager", "play_sample",{sample="error"})
+						scroll_message("Incorrect!")
+						if restart_on_error then
+							input_active=false
+							go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.7, 1.7, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)						
+							msg.post("/screen-overlay","setmode",{mode="hide"})
+							msg.post("/screen-overlay","start",{callback="lifelost"})
+						else
+							if lives==0 then
+								game_vars.score=round-1 --to be used by the game over collection
+								print("game over")
+								msg.post("startup:/handler#startup", "show_gameover")
+							end						
+						end
 					end
 				end
 			end
 		end
 	end
-
+		
 	if message_id==MSG_LIFE_LOST then --from overlay		
 		if lives==0 then
 			game_vars.score=round-1 --to be used by the game over collection
@@ -288,6 +292,7 @@ function on_message(self, message_id, message, sender)
 		else
 			scroll_message("Level restart!")
 			restart_level(self)
+			input_active=true
 		end		
 		
 	end
