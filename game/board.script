@@ -6,11 +6,13 @@ local restart_on_error=true
 local MSG_HIT = hash("hit")
 local MSG_BUTTON_TOUCH = hash("button_touch")
 local MSG_LIFE_LOST = hash("lifelost")
+local MSG_LEVEL_APPEAR = hash("appear")
+
 
 local pegs={"game-peg0","game-peg1","game-peg2","game-peg3"}
 local peg_sounds={}
 --local peg_sounds={"do","re","mi","fa"}
-local state="show" --show|play|countdown - later practice and tutorial
+local state="show" --show|play|countdown|appear - later practice and tutorial
 local round=1 --difficulty, determines chain length and (later) number of buttons
 local lives=3
 local chain_to_show={}
@@ -44,6 +46,21 @@ local function get_chain(self, initial)
 	return ret
 end
 
+local function on_countdown_click(self)
+	--maybe add a sound here
+	playback_counter=0
+	countdown=countdown-1
+	if countdown<=0 then
+		msg.post(msg.url("countdown"), "disable")
+		state="show"
+		timer.cancel(self.countdown_timer)		
+	end
+
+	go.set("countdown", "scale", vmath.vector3(10,10,10))
+	go.set("countdown", "position.x", 320-14)
+	label.set_text("countdown#lbl-counter",tostring(countdown))
+end
+
 local function prepare_next_round(self)
 	state="countdown"
 	countdown=4
@@ -59,8 +76,8 @@ local function prepare_next_round(self)
 	label.set_text("#lbl-round", "Round: "..tostring(round))
 	--go.set("#lbl-counter", "outline.w", 4)
 	--go.set("#lbl-counter", "outline", vmath.vector4(8, 0, 0, 0))
-	go.set("#lbl-counter", "outline", vmath.vector4(4, 0, 0, 0))
-	go.set("#lbl-counter", "shadow", vmath.vector4(0, 0, 1, 1)) -- Blue outline
+	--go.set("#lbl-counter", "outline", vmath.vector4(4, 0, 0, 0))
+	--go.set("#lbl-counter", "shadow", vmath.vector4(0, 0, 1, 1)) -- Blue outline
 	chain_to_show=get_chain(self,initial_chain)
 	--for i=1,#chain_to_show do print ("toshow: "..tostring(chain_to_show[i])) end				
 	
@@ -71,14 +88,22 @@ local function prepare_next_round(self)
 		table.insert(initial_chain,chain_to_show[i])
 	end
 	--for i=1,#chain_to_enter do print ("initial: "..tostring(chain_to_enter[i])) end				
-	
+
+	msg.post("/btn-abort", "deactivate") 
+	msg.post("/btn-practice", "deactivate") 
+	msg.post("/btn-abort", "disable") 
+	msg.post("/btn-practice", "disable") 
+		
 	label.set_text("#lbl-prompt-1", "Memorize the sequence")
 	msg.post(msg.url("#lbl-prompt-2"), "enable")
 	label.set_text("#lbl-prompt-2", tostring(#chain_to_enter).." moves to memorize")
-	label.set_text("#lbl-counter","Round "..tostring(round))
-	msg.post(msg.url("#lbl-counter"), "enable")
-	go.set("#lbl-counter", "scale.x", 1)
-	go.set("#lbl-counter", "scale.y", 1)
+	go.set("countdown", "scale", vmath.vector3(10,10,10))
+	go.set("countdown", "position.x", 320-14)
+	label.set_text("countdown#lbl-counter","Round "..tostring(round))	
+	msg.post(msg.url("countdown"), "enable")
+	self.countdown_timer = timer.delay(0.8, true, function()   
+		on_countdown_click(self)
+	end)	
 end
 
 local function restart_level(self)
@@ -91,13 +116,22 @@ local function restart_level(self)
 		table.insert(chain_to_enter,initial_chain[i])
 		table.insert(chain_to_show,initial_chain[i])
 	end
+
+	msg.post("/btn-abort", "deactivate") 
+	msg.post("/btn-practice", "deactivate") 
+	msg.post("/btn-abort", "disable") 
+	msg.post("/btn-practice", "disable") 
+	
+	
 	label.set_text("#lbl-prompt-1", "Memorize the sequence")
 	msg.post(msg.url("#lbl-prompt-2"), "enable")
 	label.set_text("#lbl-prompt-2", tostring(#chain_to_enter).." moves to memorize")
-	label.set_text("#lbl-counter","Round "..tostring(round))
-	msg.post(msg.url("#lbl-counter"), "enable")
-	go.set("#lbl-counter", "scale.x", 1)
-	go.set("#lbl-counter", "scale.y", 1)	
+	go.set("countdown", "scale", vmath.vector3(10,10,10))		
+	label.set_text("countdown#lbl-counter","Round "..tostring(round))	
+	msg.post(msg.url("countdown"), "enable")
+	self.countdown_timer = timer.delay(0.8, true, function()   
+		on_countdown_click(self)
+	end)	
 end
 
 local function reset_game(self) 
@@ -131,49 +165,35 @@ local function reset_game_board_sprite()
 	msg.post("#game-board", "play_animation", {id = hash("board")})	
 end
 
-function init(self)
+function init(self)	
+	msg.post(msg.url("countdown"), "disable")
 	msg.post(".", "acquire_input_focus")
-	--print ("label url is "..msg.url("#lbl-prompt-1"))
 	msg.post(msg.url("#lbl-prompt-1"), "enable")
 	msg.post(msg.url("#lbl-prompt-2"), "enable")
 	sprite.set_constant("/back#sprite", "tint", vmath.vector4(1,1,1,.4))
-	--msg.post("#game-board", "disable")
-	reset_game(self)
+	state="appear"	
+	msg.post("/screen-overlay","setmode",{mode="show"})
+	msg.post("/screen-overlay","start",{callback="appear"})	
 end
 
 function final(self)
 	msg.post(".", "release_input_focus")
 end
 
-local function on_countdown_click()
-	playback_counter=0
-	countdown=countdown-1
-	if countdown==0 then
-		msg.post(msg.url("#lbl-counter"), "disable")
-		state="show"
-		print ("state = "..state)
-	end
-	
-	label.set_text("#lbl-counter",tostring(countdown))
-	go.set("#lbl-counter", "scale.x", 1)
-	go.set("#lbl-counter", "scale.y", 1)
-
-end
-
 function update(self, dt)
 	if state=="countdown" then
-		if playback_counter ==0 then
-			playback_counter=1
-			local scale=16
-			if countdown==4 then scale=8 end
-			go.animate("#lbl-counter", "scale", go.PLAYBACK_ONCE_FORWARD,  vmath.vector3(scale, scale, 1), go.EASING_INOUTQUAD, 0.6,0,on_countdown_click)
-		end	
+		--if playback_counter ==0 then
+		--	playback_counter=1
+			--go.set("countdown", "scale", vmath.vector3(4,4,4))
+			--local scale=10
+			--if countdown==4 then scale=8 end
+			--go.animate("countdown", "scale", go.PLAYBACK_ONCE_FORWARD,  vmath.vector3(scale, scale, 1), go.EASING_LINEAR, 0.6,0,on_countdown_click)
+		--end	
 	end
 
 	if state=="show" then
 		playback_counter = playback_counter + dt
 		if playback_counter>1 then
-			--print("showing "..tostring(chain_to_show[1]))
 			msg.post(pegs[chain_to_show[1]], "play")			
 			table.remove(chain_to_show,1)
 			playback_counter=0
@@ -184,8 +204,7 @@ function update(self, dt)
 			msg.post("/btn-abort", "activate") 
 			msg.post("/btn-practice", "enable")
 			msg.post("/btn-practice", "activate") --probably not required
-			print ("state = "..state)
-			for i, v in ipairs(pegs) do					
+			for i, v in ipairs(pegs) do		
 				msg.post(v, "activate")
 			end	
 			label.set_text("#lbl-prompt-1", "Replay the sequence")	
@@ -196,9 +215,10 @@ function update(self, dt)
 	
 	if state=="play" then
 		if #chain_to_enter==0 then
+			for i, v in ipairs(pegs) do		
+				msg.post(v, "deactivate")
+			end				
 			prepare_next_round(self)
-			--print ("current round = "..tostring(round))
-			--print ("round won - go to next")
 		end
 	end
 end
@@ -212,14 +232,12 @@ function on_message(self, message_id, message, sender)
 				if state=="practice" then 
 					state="play" 
 					txt="Enter practice" 
-					print ("state = "..state)
 					reset_game_board_sprite()
 					label.set_text("#lbl-prompt-1", "Replay the sequence")	
 					msg.post(msg.url("#lbl-prompt-2"), "disable")
 				else 
 					state="practice" 
 					txt="Exit practice" 
-					print ("state = "..state)
 					msg.post("#game-board", "play_animation", {id = hash("board-gray")})
 					label.set_text("#lbl-prompt-1", "In practice mode")
 					msg.post(msg.url("#lbl-prompt-2"), "disable")
@@ -237,7 +255,6 @@ function on_message(self, message_id, message, sender)
 				go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.5, 1.5, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)			
 			end
 			if state=="play" then
-				print ("receive hit for peg with order = "..message.order)
 				if #chain_to_enter>0 then
 					go.cancel_animations("#game-board", "scale")
 					if chain_to_enter[1]==message.order then
@@ -256,10 +273,7 @@ function on_message(self, message_id, message, sender)
 						else
 							remaining = "Well done!"
 						end
-						--print ("setting text to "..remaining)
 						scroll_message(remaining)
-						--go.set_position(vmath.vector3(1200, self.initial_pos.y, self.initial_pos.z), self.label_object)
-						--print ("Remaining pegs: "..tostring(#chain_to_enter))
 					else
 						lives=lives-1
 						msg.post("/lives#lives", "set_lives", {lives=lives})
@@ -269,11 +283,13 @@ function on_message(self, message_id, message, sender)
 							input_active=false
 							go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.7, 1.7, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)						
 							msg.post("/screen-overlay","setmode",{mode="hide"})
-							msg.post("/screen-overlay","start",{callback="lifelost"})
+							msg.post("/screen-overlay","start",{callback="lifelost", duration=0.5})
+							for i, v in ipairs(pegs) do		
+								msg.post(v, "deactivate")
+							end	
 						else
 							if lives==0 then
 								game_vars.score=round-1 --to be used by the game over collection
-								print("game over")
 								msg.post("startup:/handler#startup", "show_gameover")
 							end						
 						end
@@ -286,15 +302,18 @@ function on_message(self, message_id, message, sender)
 	if message_id==MSG_LIFE_LOST then --from overlay		
 		if lives==0 then
 			game_vars.score=round-1 --to be used by the game over collection
-			print("game over")
 			--back to menu for now, should have proper game over screen, leaderboards etc
 			msg.post("startup:/handler#startup", "show_gameover")
 		else
 			scroll_message("Level restart!")
 			restart_level(self)
 			input_active=true
-		end		
-		
+		end				
+	end
+
+	if message_id==MSG_LEVEL_APPEAR then --from overlay
+		state="countdown"
+		reset_game(self)
 	end
 	--print("message "..hash(message_id).." received on "..tostring(self))
 end

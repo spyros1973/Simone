@@ -41,6 +41,7 @@ function on_message(self, message_id, message, sender)
 	end
 
 	if message_id==MSG_DEACTIVATE then
+		print ("deactive message received for peg")
 		self.active=false
 	end
 		
@@ -69,6 +70,7 @@ function on_message(self, message_id, message, sender)
 		msg.post("/sound_manager", "play_sample",{sample=self.sound})
 		play_hit_anim(self)
 		msg.post(self.my_parent, "hit", {order = self.order})
+		self.mouse_pressed=false
 		--go.delete()
 		--print (message.other_id)
 	end
