@@ -60,3 +60,15 @@ embedded_components {
   data: "sound: \"/assets/sounds/fa.wav\"\n"
   ""
 }
+embedded_components {
+  id: "tick"
+  type: "sound"
+  data: "sound: \"/assets/sounds/tick.wav\"\n"
+  ""
+}
+embedded_components {
+  id: "click"
+  type: "sound"
+  data: "sound: \"/assets/sounds/click.wav\"\n"
+  ""
+}

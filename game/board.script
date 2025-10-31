@@ -26,7 +26,7 @@ local function scroll_message(txt)
 	label.set_text("scroller#lbl-message",txt)
 	local sp=go.get_position("scroller")	
 	go.set_position(vmath.vector3(650,sp.y,sp.z), "scroller")
-	go.animate("scroller", "position.x", go.PLAYBACK_ONCE_FORWARD,-300, go.EASING_LINEAR, 4,0)	
+	go.animate("scroller", "position.x", go.PLAYBACK_ONCE_FORWARD,-300, go.EASING_LINEAR, 3.5,0)	
 end
 
 local function get_chain(self, initial)
@@ -46,16 +46,17 @@ local function get_chain(self, initial)
 	return ret
 end
 
-local function on_countdown_click(self)
-	--maybe add a sound here
+local function on_countdown_click(self)	
 	playback_counter=0
 	countdown=countdown-1
-	if countdown<=0 then
+	if countdown==0 then
 		msg.post(msg.url("countdown"), "disable")
 		state="show"
-		timer.cancel(self.countdown_timer)		
+		timer.cancel(self.countdown_timer)
+		return
 	end
 
+	msg.post("/sound_manager", "play_sample",{sample="tick"})
 	go.set("countdown", "scale", vmath.vector3(10,10,10))
 	go.set("countdown", "position.x", 320-14)
 	label.set_text("countdown#lbl-counter",tostring(countdown))
@@ -99,6 +100,7 @@ local function prepare_next_round(self)
 	label.set_text("#lbl-prompt-2", tostring(#chain_to_enter).." moves to memorize")
 	go.set("countdown", "scale", vmath.vector3(10,10,10))
 	go.set("countdown", "position.x", 320-14)
+	msg.post("/sound_manager", "play_sample",{sample="tick"})
 	label.set_text("countdown#lbl-counter","Round "..tostring(round))	
 	msg.post(msg.url("countdown"), "enable")
 	self.countdown_timer = timer.delay(0.8, true, function()   
@@ -167,6 +169,7 @@ end
 
 function init(self)	
 	msg.post(msg.url("countdown"), "disable")
+	msg.post(msg.url("error-icon"), "disable")
 	msg.post(".", "acquire_input_focus")
 	msg.post(msg.url("#lbl-prompt-1"), "enable")
 	msg.post(msg.url("#lbl-prompt-2"), "enable")
@@ -284,6 +287,12 @@ function on_message(self, message_id, message, sender)
 							go.animate("#game-board", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(1.7, 1.7, 1), go.EASING_INCUBIC, 0.2, 0, reset_game_board_sprite)						
 							msg.post("/screen-overlay","setmode",{mode="hide"})
 							msg.post("/screen-overlay","start",{callback="lifelost", duration=0.5})
+							go.set_scale(vmath.vector3(2,2,1), "error-icon")
+							
+							go.animate("error-icon", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(0.5,0.5,1), go.EASING_LINEAR, 0.5, 0, function()
+								msg.post(msg.url("error-icon"), "disable")
+							end)														
+							msg.post(msg.url("error-icon"), "enable")
 							for i, v in ipairs(pegs) do		
 								msg.post(v, "deactivate")
 							end	

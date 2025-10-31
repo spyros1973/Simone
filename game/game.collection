@@ -114,6 +114,7 @@ embedded_instances {
   children: "btn-practice"
   children: "countdown"
   children: "cursor"
+  children: "error-icon"
   children: "game-peg0"
   children: "game-peg1"
   children: "game-peg2"
@@ -311,5 +312,28 @@ embedded_instances {
     x: 320.0
     y: 691.0
     z: 0.7
+  }
+}
+embedded_instances {
+  id: "error-icon"
+  data: "embedded_components {\n"
+  "  id: \"sprite\"\n"
+  "  type: \"sprite\"\n"
+  "  data: \"default_animation: \\\"error\\\"\\n"
+  "material: \\\"/builtins/materials/sprite.material\\\"\\n"
+  "size {\\n"
+  "  x: 512.0\\n"
+  "  y: 512.0\\n"
+  "}\\n"
+  "textures {\\n"
+  "  sampler: \\\"texture_sampler\\\"\\n"
+  "  texture: \\\"/assets/main.atlas\\\"\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 320.0
+    y: 568.0
   }
 }
