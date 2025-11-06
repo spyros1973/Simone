@@ -8,6 +8,7 @@ local MSG_BUTTON_TOUCH = hash("button_touch")
 local MSG_LIFE_LOST = hash("lifelost")
 local MSG_LEVEL_APPEAR = hash("appear")
 
+local speed=1
 
 local pegs={"game-peg0","game-peg1","game-peg2","game-peg3"}
 local peg_sounds={}
@@ -47,13 +48,20 @@ local function get_chain(self, initial)
 end
 
 local function on_countdown_click(self)	
+	timer.cancel(self.countdown_timer)
+	
 	playback_counter=0
 	countdown=countdown-1
 	if countdown==0 then
 		msg.post(msg.url("countdown"), "disable")
 		state="show"
-		timer.cancel(self.countdown_timer)
+		--timer.cancel(self.countdown_timer)
+		speed=1
 		return
+	else
+		self.countdown_timer = timer.delay(0.8/speed, true, function()   
+			on_countdown_click(self)
+		end)			
 	end
 
 	msg.post("/sound_manager", "play_sample",{sample="tick"})
@@ -103,7 +111,7 @@ local function prepare_next_round(self)
 	msg.post("/sound_manager", "play_sample",{sample="tick"})
 	label.set_text("countdown#lbl-counter","Round "..tostring(round))	
 	msg.post(msg.url("countdown"), "enable")
-	self.countdown_timer = timer.delay(0.8, true, function()   
+	self.countdown_timer = timer.delay(0.8/speed, true, function()   
 		on_countdown_click(self)
 	end)	
 end
@@ -137,6 +145,7 @@ local function restart_level(self)
 end
 
 local function reset_game(self) 
+	speed=1
 	round=0	
 	msg.post("/lives#lives", "set_lives", {lives=lives})
 	local sprites={"peg-red","peg-green","peg-blue","peg-yellow"}
@@ -195,7 +204,7 @@ function update(self, dt)
 	end
 
 	if state=="show" then
-		playback_counter = playback_counter + dt
+		playback_counter = playback_counter + (dt * speed)
 		if playback_counter>1 then
 			msg.post(pegs[chain_to_show[1]], "play")			
 			table.remove(chain_to_show,1)
@@ -331,6 +340,11 @@ function on_input(self, action_id, action)
 	if action_id == hash("touch") then
 		local pos = vmath.vector3(action.x, action.y, 0)
 		go.set_position(pos, "cursor")
+		if state=="show" or state=="countdown"then
+			speed=3
+		end
+	else
+		speed=1
 	end
 
 	if action_id == hash("escape") and action.released then

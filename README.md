@@ -30,6 +30,9 @@ v1.3
 - Peg sounds can be selected
 - Fix for wrong hit test with the new graphics
 
+v1.4
+- Clicking while the level countdown and the sequence to copy is shown, speeds things up
+
 # About
 Simone has been created using Defold and specifically the "mobile" project template. This means that the settings in ["game.project"](defold://open?path=/game.project) have been changed to be suitable for a mobile game:
 
